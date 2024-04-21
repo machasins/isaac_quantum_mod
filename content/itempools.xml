@@ -1,0 +1,8 @@
+<ItemPools>
+    <Pool Name="secret">
+        <!-- Emergent Gravity, Butterfly's Effect,  -->
+        <Item Name="Butterfly's Effect" Weight="0.5" DecreaseBy="0.5" RemoveOn="0.05" />
+        <!-- Convergence, Divergence, Quantum Scissors -->
+        <Item Name="Quantum Scissors" Weight="0.5" DecreaseBy="0.5" RemoveOn="0.05" />
+    </Pool>
+</ItemPools>
