@@ -32,7 +32,7 @@ local function RetrieveSpawnedEffectData(effect, hash, laser, colorLaser, laserT
     -- Retrieve the flags from the laser that spawned this effect
     local playerTearEffects = LASER.effect[hash].laser.TearFlags
     -- Compile all the flags that should be removed
-    local flagsToRemove = 0
+    local flagsToRemove = BitSet128(0,0)
     for _, f in pairs(LASER.FLAG_REMOVE_LIST) do
         flagsToRemove = flagsToRemove | f
     end
@@ -46,15 +46,16 @@ end
 ---@param colorLaser EntityLaser The laser spawned for color data
 ---@param hash number The hash of the laser
 ---@param laser EntityLaser The inital laser
+---@param laserType TYPE The type of the laser
 ---@param player EntityPlayer The player
-local function RetrieveSpawnedLaserData(colorLaser, hash, laser, player)
+local function RetrieveSpawnedLaserData(colorLaser, hash, laser, laserType, player)
     -- Initalize data
     LASER.spawned[hash] = {}
     -- Keep track of the player that spawned this laser
     LASER.spawned[hash].player = player
     -- Set the timeout for the laser [Function definition is incorrect]
 ---@diagnostic disable-next-line: param-type-mismatch
-    colorLaser:SetTimeout(LASER.TIME[hash].FIRE + 60)
+    colorLaser:SetTimeout(LASER.TIME[laserType].FIRE + 60)
     -- Adjust the tear flags of the laser
     colorLaser:AddTearFlags(laser.TearFlags)
     for _, f in pairs(LASER.FLAG_MATCH_LIST) do
@@ -62,6 +63,7 @@ local function RetrieveSpawnedLaserData(colorLaser, hash, laser, player)
     end
     -- Set the inital color of the laser
     colorLaser:GetSprite().Color = laser:GetSprite().Color
+    colorLaser:GetSprite().Color.A = 1.0
     -- Disable the laser from being viewed
     colorLaser.Visible = false
 end
@@ -90,13 +92,15 @@ local function SpawnLaserEffect(laser, player, laserType, position)
     if colorLaser then
         -- Get associated data for the color laser
         local laserHash = colorLaser.Index
-        RetrieveSpawnedLaserData(colorLaser, laserHash, laser, player)
+        RetrieveSpawnedLaserData(colorLaser, laserHash, laser, laserType, player)
         
         -- Spawn the effect that goes before the laser
         local effect = Isaac.Spawn(EntityType.ENTITY_EFFECT, LASER.TO_EFFECT[laserType], 0, position, Vector(0,0), nil):ToEffect()
         if effect then
             -- Get associated data for the effect
             local effectHash = effect.Index
+            -- Set the scale of the effect
+            effect.SpriteScale = effect.SpriteScale * LASER.WEAPON_EFFECT_SCALE[laserType]
             RetrieveSpawnedEffectData(effect, effectHash, laser, colorLaser, laserType, player)
             -- Initalize the effect to have the correct color
             SetEffectColor(effect)
@@ -133,9 +137,16 @@ local function HandleLaserFire(effect, player)
         -- Adjust velocity to correct margins
         laser.Velocity = direction:LengthSquared() >= 0.01 and direction or (player.Position - effect.Position):Normalized()
         laser.Velocity = laser.Velocity * player.ShotSpeed * 10
+        laser.Radius = effectData.laser.Radius * LASER.WEAPON_SCALE[LASER.TYPE.TECHX]
+    elseif effectData.laserType == LASER.TYPE.BRIMSTONE then
+        -- Spawn Brimstones
+        laser = player:FireBrimstone(direction, nil, LASER.DAMAGE)
+        laser.DisableFollowParent = true
     else
-        -- Spawn other types of lasers
-        laser = Isaac.Spawn(EntityType.ENTITY_LASER, effectData.laser.Variant, effectData.laser.SubType, effect.Position, Vector(0,0), player):ToLaser()
+        -- Spawn Techology
+        laser = Isaac.Spawn(EntityType.ENTITY_LASER, effectData.laser.Variant, effectData.laser.SubType, effect.Position, Vector(0,0), player):ToLaser() or effectData.colorLaser
+        -- Set the scale of the laser
+        laser.Size = laser.Size * 0.5
     end
     if laser then
         -- Set position to the effect's position
@@ -143,7 +154,7 @@ local function HandleLaserFire(effect, player)
         -- Reset the offset
         laser.PositionOffset = Vector(0,0)
         -- Adjust the laser so that it is above the effect
-        laser.DepthOffset = 1
+        --laser.DepthOffset = effect.DepthOffset + 1
         -- Angle the laser to aim at the correct position
         laser.AngleDegrees = direction:LengthSquared() >= 0.01 and direction:GetAngleDegrees() or (player.Position - effect.Position):GetAngleDegrees()
         -- Apply all of the tear flags that the player has
@@ -153,7 +164,7 @@ local function HandleLaserFire(effect, player)
         -- Make the lasers spectral
         laser:AddTearFlags(TearFlags.TEAR_SPECTRAL)
         -- Set the duration of the laser [Function definition is incorrect]
----@diagnostic disable-next-line: param-type-mismatch
+        ---@diagnostic disable-next-line: param-type-mismatch
         laser:SetTimeout(LASER.WEAPON_DURATION[effectData.laserType])
         -- Correctly set damage [Tech 2]
         laser.CollisionDamage = effectData.laser.CollisionDamage * LASER.DAMAGE
@@ -224,6 +235,7 @@ function Quantum.QW:OnLaserCreate(laser)
 
     -- Code that runs for spawned lasers, initialization
     if LASER.spawned[hash] then
+        laser.Size = laser.Size * 0.5
         LASER.spawned[hash] = false
         return
     end

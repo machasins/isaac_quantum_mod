@@ -1,5 +1,5 @@
 <items gfxroot="gfx/items/" deathanm2="gfx/death_items.anm2" version="1">
-    <passive id="1" name="Butterfly's Effect" gfx="item_quantum_dice.png" description="Slight changes magnify" quality="4" />
-    <passive id="2" name="Quantum Scissors" gfx="item_quantum_dice.png" description="Everchanging" quality="3" />
-    <passive id="3" name="Hydrokinesis" gfx="item_quantum_dice.png" description="Everchanging" quality="3" />
+    <passive id="1" name="Butterfly's Effect" gfx="item_butterflys_effect.png" description="Slight changes magnify" quality="4" />
+    <passive id="2" name="Quantum Scissors" gfx="item_quantum_scissors.png" description="Cut the bonds of the unseen" quality="3" />
+    <passive id="3" name="Hydrokinesis" gfx="item_hydrokinesis.png" description="Let your mind create water" quality="4" />
 </items>

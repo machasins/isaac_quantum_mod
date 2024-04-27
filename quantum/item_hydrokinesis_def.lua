@@ -7,6 +7,7 @@
 ---@field SPAWN_TIME number How long the spawn animation for the tear takes
 ---@field FIRE_TIME number When the tear gets fired at an enemy
 ---@field DAMAGE number The percent of damage the tear should do
+---@field SCALE number The percent of original scale the tear should be
 ---@field INITIAL_HEIGHT number How high the tear should be when rising from the ground
 ---@field FOLLOW_PLAYER boolean If the tear should follow the player
 ---@field FOLLOW_SPEED number How fast should the tear follow the player
@@ -21,6 +22,7 @@ local TEAR = Quantum.QW.Tear
 TEAR.SPAWN_TIME = 30
 TEAR.FIRE_TIME = 50
 TEAR.DAMAGE = 0.5
+TEAR.SCALE = 0.75
 TEAR.INITIAL_HEIGHT = -10
 
 TEAR.FOLLOW_PLAYER = false
@@ -49,7 +51,8 @@ TEAR.FLAG_MATCH_LIST = {
     TearFlags.TEAR_CONTINUUM,
     TearFlags.TEAR_BONE,
     TearFlags.TEAR_ABSORB,
-    TearFlags.TEAR_BOUNCE_WALLSONLY
+    TearFlags.TEAR_BOUNCE_WALLSONLY,
+    TearFlags.TEAR_FETUS_BOMBER,
 }
 
 --#endregion
@@ -82,7 +85,7 @@ TEAR.FLAG_MATCH_LIST = {
 Quantum.QW.Laser = {}
 local LASER = Quantum.QW.Laser
 
-LASER.DAMAGE = 0.5
+LASER.DAMAGE = 0.4
 
 LASER.FOLLOW_PLAYER = false
 LASER.FOLLOW_SPEED = 0.75
@@ -148,7 +151,10 @@ LASER.FLAG_MATCH_LIST = {
     TearFlags.TEAR_CONTINUUM,
     TearFlags.TEAR_BONE,
     TearFlags.TEAR_ABSORB,
-    TearFlags.TEAR_BOUNCE_WALLSONLY
+    TearFlags.TEAR_BOUNCE_WALLSONLY,
+    TearFlags.TEAR_FETUS_TECH,
+    TearFlags.TEAR_FETUS_TECHX,
+    TearFlags.TEAR_FETUS_BRIMSTONE,
 }
 
 LASER.TO_EFFECT = {
@@ -180,8 +186,8 @@ LASER.WEAPON_EFFECT_ADD_LENGTH = {
 }
 
 LASER.WEAPON_EFFECT_SCALE = {
-    [LASER.TYPE.TECHX] = 2,
-    [LASER.TYPE.BRIMSTONE] = 0.5,
+    [LASER.TYPE.TECHX] = 1.5,
+    [LASER.TYPE.BRIMSTONE] = 0.6,
     [LASER.TYPE.TECH] = 1,
 }
 
@@ -194,7 +200,7 @@ LASER.WEAPON_SCALE = {
 LASER.WEAPON_DURATION = {
     [LASER.TYPE.TECHX] = 0,
     [LASER.TYPE.BRIMSTONE] = 15,
-    [LASER.TYPE.TECH] = 2,
+    [LASER.TYPE.TECH] = 5,
 }
 
 --#endregion

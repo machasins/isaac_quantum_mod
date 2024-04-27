@@ -14,21 +14,23 @@ local game = Game()
 ---@param hash number
 ---@param player EntityPlayer
 local function RetrieveSpawnedTearData(tear, hash, player)
-    TEAR.spawned[hash].originalScale = tear.Scale
+    TEAR.spawned[hash].originalScale = tear.BaseScale * TEAR.SCALE
     TEAR.spawned[hash].originalFallingAcceleration = tear.FallingAcceleration
     TEAR.spawned[hash].offsetPosition = tear.Position - tear.SpawnerEntity.Position
     TEAR.spawned[hash].originalHeight = tear.Height
     TEAR.spawned[hash].originalAlpha = tear:GetSprite().Color.A
-    local flagsToRemove = 0
+    local flagsToRemove = BitSet128(0,0)
     for _, f in pairs(TEAR.FLAG_REMOVE_LIST) do
         if tear:HasTearFlags(f) then
             flagsToRemove = flagsToRemove | f
+            print(f)
         end
     end
-    local flagsToReAdd = 0
+    local flagsToReAdd = BitSet128(0,0)
     for _, f in pairs(TEAR.FLAG_READD_LIST) do
         if tear:HasTearFlags(f) then
             flagsToReAdd = flagsToReAdd | f
+            print(f)
         end
     end
     tear:ClearTearFlags(flagsToRemove | flagsToReAdd)
@@ -44,12 +46,12 @@ local function SpawnTear(tear, player, position)
     if newTear then
         local hash = newTear.Index
         TEAR.spawned[hash] = {}
-        local playerTearData = player:GetTearHitParams(WeaponType.WEAPON_TEARS)
+        local playerTearData = player:GetTearHitParams(tear.Variant == TearVariant.FETUS and WeaponType.WEAPON_FETUS or WeaponType.WEAPON_TEARS)
         newTear.Parent = player
         newTear.Height = playerTearData.TearHeight
         newTear.Scale = playerTearData.TearScale
-        newTear.CollisionDamage = playerTearData.TearDamage * TEAR.DAMAGE
-        newTear.TearFlags = playerTearData.TearFlags
+        newTear.CollisionDamage = tear.CollisionDamage * TEAR.DAMAGE
+        newTear.TearFlags = tear.TearFlags
         RetrieveSpawnedTearData(newTear, hash, player)
         newTear:AddTearFlags(TearFlags.TEAR_SPECTRAL)
         newTear.FallingAcceleration = 0
@@ -81,7 +83,14 @@ local function HandleTearShot(tear, player)
 end
 
 local function HandleSpawnedTear(tear, hash, player)
-    if TEAR.spawned[hash] == nil then
+    if tear.Variant == TearVariant.FETUS and TEAR.spawned[hash].child == nil then
+        local knifes = Isaac.FindByType(EntityType.ENTITY_KNIFE)
+        for _,k in pairs(knifes) do
+            if GetPtrHash(k.Parent) == GetPtrHash(tear) then
+                TEAR.spawned[hash].child = k:ToKnife()
+            end
+        end
+        TEAR.spawned[hash].child = TEAR.spawned[hash].child or {}
     end
 
     local tearData = TEAR.spawned[hash]
@@ -109,10 +118,10 @@ end
 function Quantum.QW:OnTearCreate(tear)
     local hash = tear.Index
     if TEAR.normal[hash] == false then return end
-    
+
     local player = tear.SpawnerEntity and tear.SpawnerEntity:ToPlayer() or nil
     if not (player and player:HasCollectible(Quantum.QW.ID)) then return end
-    
+
     if TEAR.isSpawning or TEAR.spawned[hash] ~= nil then
         HandleSpawnedTear(tear, hash, player)
         return
@@ -122,7 +131,7 @@ function Quantum.QW:OnTearCreate(tear)
 
     local isLudo = tear:HasTearFlags(TearFlags.TEAR_LUDOVICO)
 
-    local playerTearFlags = player:GetTearHitParams(WeaponType.WEAPON_TEARS).TearFlags
+    local playerTearFlags = player:GetTearHitParams(tear.Variant == TearVariant.FETUS and WeaponType.WEAPON_FETUS or WeaponType.WEAPON_TEARS).TearFlags
     if not UTILS.DoTearFlagsMatch(playerTearFlags, tear.TearFlags, TEAR.FLAG_MATCH_LIST) then
         TEAR.normal[hash] = false
         return
@@ -143,7 +152,7 @@ function Quantum.QW:OnTearCreate(tear)
 
     local randomPos = Vector(0,0)
     if TEAR.FOLLOW_PLAYER then
-        randomPos = player.Position + 
+        randomPos = player.Position +
             rng:RandomVector() * (rng:RandomInt(2) * 2 - 1) * (TEAR.SPAWN_MIN_DISTANCE + rng:RandomFloat() * (TEAR.SPAWN_MAX_DISTANCE - TEAR.SPAWN_MIN_DISTANCE))
     else
         randomPos = game:GetLevel():GetCurrentRoom():GetRandomPosition(1)
