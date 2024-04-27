@@ -255,7 +255,7 @@ function Quantum.QW:OnLaserCreate(laser)
     end
 
     -- Get the chance that the player will spawn a laser
-    local spawnChance = UTILS.GetLuckChance(player,
+    local spawnChance = UTILS.GetLuckChance(player.Luck,
         LUCK.BASE_CHANCE + LUCK.ADD_CHANCE * (player:GetCollectibleNum(Quantum.QW.ID) - 1),
         LUCK.MULTIPLIER,
         LUCK.MIN_CHANCE,

@@ -137,7 +137,7 @@ function Quantum.QW:OnTearCreate(tear)
         return
     end
 
-    local spawnChance = UTILS.GetLuckChance(player,
+    local spawnChance = UTILS.GetLuckChance(player.Luck,
         LUCK.BASE_CHANCE + LUCK.ADD_CHANCE * (player:GetCollectibleNum(Quantum.QW.ID) - 1),
         LUCK.MULTIPLIER,
         LUCK.MIN_CHANCE,

@@ -3,14 +3,14 @@ local utils = {}
 
 
 ---comment
----@param player EntityPlayer
+---@param playerLuck number
 ---@param baseChance number
 ---@param luckMultiplier number
 ---@param minChance number
 ---@param maxChance number
 ---@return number
-function utils.GetLuckChance(player, baseChance, luckMultiplier, minChance, maxChance)
-    return math.min(math.max(baseChance + luckMultiplier * player.Luck, minChance), maxChance)
+function utils.GetLuckChance(playerLuck, baseChance, luckMultiplier, minChance, maxChance)
+    return math.min(math.max(baseChance + luckMultiplier * playerLuck, minChance), maxChance)
 end
 
 ---comment

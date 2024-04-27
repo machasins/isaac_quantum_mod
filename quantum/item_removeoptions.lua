@@ -3,9 +3,15 @@ local game = Game()
 
 local QS_ID = Isaac.GetItemIdByName("Quantum Scissors")
 local QUEUE = include("quantum.sys_queue")
+---@type UTILS
+local UTILS = include("quantum.utils")
 
 local REMOVE_CHANCE = 0.1
 local ADDITIONAL_CHANCE = 0.1
+local LUCK_MULT = 0.02
+local MIN_CHANCE = 0.05
+local MAX_CHANCE = 0.5
+
 local EFFECT_SPAWN_DELAY = 30
 
 local VISIBLE_OPTIONS_EFFECT = 695
@@ -35,10 +41,17 @@ function Quantum.QS:RemoveOptions(pickup)
         if pickup.OptionsPickupIndex ~= 0 then
             -- Chance to remove Options
             local numItem = 0
-            ForEachPlayer(function(_, e) if e:HasCollectible(QS_ID) then numItem = numItem + e:GetCollectibleNum(QS_ID) end end)
+            local highestPlayerLuck = 0
+            ForEachPlayer(function(_, e)
+                if e:HasCollectible(QS_ID) then
+                    numItem = numItem + e:GetCollectibleNum(QS_ID)
+                    highestPlayerLuck = highestPlayerLuck < e.Luck and e.Luck or highestPlayerLuck
+                end
+            end)
             if numItem > 0 then
                 local rng = Isaac.GetPlayer():GetCollectibleRNG(QS_ID)
-                if rng:RandomFloat() <= (REMOVE_CHANCE + ADDITIONAL_CHANCE * (numItem - 1)) then
+                local chance = UTILS.GetLuckChance(highestPlayerLuck, REMOVE_CHANCE + ADDITIONAL_CHANCE * (numItem - 1), LUCK_MULT, MIN_CHANCE, MAX_CHANCE)
+                if rng:RandomFloat() <= chance then
                     pickup.OptionsPickupIndex = 0
                     QUEUE:AddItem(EFFECT_SPAWN_DELAY, function()
                         local effect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF02, 0, pickup.Position, Vector(0,0), nil) 
@@ -59,8 +72,9 @@ Quantum:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, Quantum.QS.RemoveOptions
 if EID then
     EID:addCollectible(
         QS_ID,
-        "Gives a 10% chance to decouple a pickup from other linked pickups" ..
-        "#This includes Alt Path treasure rooms, all Options items, Angel rooms, Boss Rush, etc."
+        "Gives a luck affected 10% chance to decouple a pickup from other linked pickups" ..
+        "#This includes Alt Path treasure rooms, all Options items, Angel rooms, Boss Rush, etc." ..
+        "#50% chance to decouple at 20 Luck"
     )
 
     if EIDD then
