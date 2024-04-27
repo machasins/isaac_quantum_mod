@@ -12,7 +12,7 @@ local LUCK_MULT = 0.02
 local MIN_CHANCE = 0.05
 local MAX_CHANCE = 0.5
 
-local EFFECT_SPAWN_DELAY = 30
+local EFFECT_SPAWN_DELAY = 40
 
 local VISIBLE_OPTIONS_EFFECT = 695
 
@@ -54,9 +54,9 @@ function Quantum.QS:RemoveOptions(pickup)
                 if rng:RandomFloat() <= chance then
                     pickup.OptionsPickupIndex = 0
                     QUEUE:AddItem(EFFECT_SPAWN_DELAY, function()
-                        local effect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF02, 0, pickup.Position, Vector(0,0), nil) 
+                        local effect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF02, 0, pickup.Position, Vector(0,0), nil)
                         effect:GetSprite().Color:SetOffset(0,1,1)
-                        effect:GetSprite().Color.A = 0.5
+                        effect:GetSprite().Color.A = 0.75
                     end)
                     -- Addition for Choice Viewer
                     RemoveAdditionalEffect(VISIBLE_OPTIONS_EFFECT, pickup.Index)
