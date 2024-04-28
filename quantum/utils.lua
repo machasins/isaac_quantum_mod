@@ -63,6 +63,49 @@ function utils.GetPlayerWeaponType(player, viableOptions, default)
 end
 
 ---comment
+---@param id CollectibleType
+function utils.AnyPlayerHasCollectible(id)
+    local playerNum = Game():GetNumPlayers()
+    for i = 0, playerNum - 1 do
+        local player = Isaac.GetPlayer(i)
+        if player:HasCollectible(id) then
+            return true
+        end
+    end
+
+    return false
+end
+
+---comment
+---@param id CollectibleType
+---@return number
+function utils.GetPlayerCollectibleNum(id)
+    local ret = 0
+    local playerNum = Game():GetNumPlayers()
+    for i = 0, playerNum - 1 do
+        local player = Isaac.GetPlayer(i)
+        ret = ret + player:GetCollectibleNum(id)
+    end
+
+    return ret
+end
+
+---comment
+---@param stat string
+---@return number
+function utils.GetHighestPlayerStat(stat)
+    local ret = math.mininteger
+    local playerNum = Game():GetNumPlayers()
+    for i = 0, playerNum - 1 do
+        local player = Isaac.GetPlayer(i)
+        local playerStat = player[stat]
+        ret = ret < playerStat and playerStat or ret
+    end
+
+    return ret == math.mininteger and 0 or ret
+end
+
+---comment
 ---@param entity Entity
 ---@return boolean
 function utils.IsTargetableEnemy(entity)

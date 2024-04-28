@@ -5,6 +5,10 @@
         <!-- Hydrokinesis -->
         <Item Name="Hydrokinesis" Weight="0.5" DecreaseBy="0.5" RemoveOn="0.05" />
     </Pool>
+    <Pool Name="shop">
+        <!-- Clyde Pills, Horse Tranquilizer, Blank Prescription -->
+        <Item Name="Clyde Pills" Weight="1.0" DecreaseBy="1.0" RemoveOn="0.05" />
+    </Pool>
     <Pool Name="secret">
         <!-- Emergent Gravity, Butterfly's Effect,  -->
         <Item Name="Butterfly's Effect" Weight="0.5" DecreaseBy="0.5" RemoveOn="0.05" />

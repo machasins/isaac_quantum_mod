@@ -10,7 +10,7 @@ local LUCK = Quantum.QW.Luck
 
 LUCK.BASE_CHANCE = 0.2
 LUCK.ADD_CHANCE = 0.1
-LUCK.MULTIPLIER = 0.05
+LUCK.MULTIPLIER = 0.012
 LUCK.MIN_CHANCE = 0.05
 LUCK.MAX_CHANCE = 0.8
 
@@ -62,8 +62,9 @@ Quantum:AddCallback(ModCallbacks.MC_POST_UPDATE, Quantum.QW.OnUpdate)
 if EID then
     EID:addCollectible(
         Quantum.QW.ID,
-        "Gives a 10% chance to decouple a pickup from other linked pickups" ..
-        "#This includes Alt Path treasure rooms, all Options items, Angel rooms, Boss Rush, etc."
+        "{{Tearsize}} 20% chance to summon a tear randomly in the room when firing a tear" ..
+        "#{{Bait}} Summoned tears are fired at the nearest enemy" ..
+        "#{{Luck}} 80% chance at 50 Luck"
     )
 
     if EIDD then

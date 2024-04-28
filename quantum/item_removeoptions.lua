@@ -12,18 +12,9 @@ local LUCK_MULT = 0.02
 local MIN_CHANCE = 0.05
 local MAX_CHANCE = 0.5
 
-local EFFECT_SPAWN_DELAY = 40
+local EFFECT_SPAWN_DELAY = 30
 
 local VISIBLE_OPTIONS_EFFECT = 695
-
-local checkedPickups = {}
-
-local function ForEachPlayer(func)
-    local num = game:GetNumPlayers()
-    for i = 0, num - 1 do
-        func(i, game:GetPlayer(i))
-    end
-end
 
 local function RemoveAdditionalEffect(effect_type, match)
     local choices = Isaac.FindByType(EntityType.ENTITY_EFFECT, effect_type)
@@ -37,17 +28,13 @@ end
 ---comment
 ---@param pickup EntityPickup
 function Quantum.QS:RemoveOptions(pickup)
-    if checkedPickups[pickup.Index] == nil then
+    local save = Quantum.save.GetFloorSave()
+    save.pickupHashes = save.pickupHashes or {}
+    if not save.pickupHashes[pickup.Index .. ""] then
         if pickup.OptionsPickupIndex ~= 0 then
             -- Chance to remove Options
-            local numItem = 0
-            local highestPlayerLuck = 0
-            ForEachPlayer(function(_, e)
-                if e:HasCollectible(QS_ID) then
-                    numItem = numItem + e:GetCollectibleNum(QS_ID)
-                    highestPlayerLuck = highestPlayerLuck < e.Luck and e.Luck or highestPlayerLuck
-                end
-            end)
+            local numItem = UTILS.GetPlayerCollectibleNum(QS_ID)
+            local highestPlayerLuck = UTILS.GetHighestPlayerStat("Luck")
             if numItem > 0 then
                 local rng = Isaac.GetPlayer():GetCollectibleRNG(QS_ID)
                 local chance = UTILS.GetLuckChance(highestPlayerLuck, REMOVE_CHANCE + ADDITIONAL_CHANCE * (numItem - 1), LUCK_MULT, MIN_CHANCE, MAX_CHANCE)
@@ -63,7 +50,7 @@ function Quantum.QS:RemoveOptions(pickup)
                 end
             end
         end
-        checkedPickups[pickup.Index] = true
+        save.pickupHashes[pickup.Index .. ""] = true
     end
 end
 
@@ -72,9 +59,9 @@ Quantum:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, Quantum.QS.RemoveOptions
 if EID then
     EID:addCollectible(
         QS_ID,
-        "Gives a luck affected 10% chance to decouple a pickup from other linked pickups" ..
+        "{{TreasureRoomChance}} 10% chance to decouple a pickup from other linked pickups" ..
         "#This includes Alt Path treasure rooms, all Options items, Angel rooms, Boss Rush, etc." ..
-        "#50% chance to decouple at 20 Luck"
+        "#{{Luck}} 50% chance at 20 Luck"
     )
 
     if EIDD then
