@@ -3,4 +3,5 @@
     <passive id="2" name="Quantum Scissors" gfx="item_quantum_scissors.png" description="Cut the bonds of the unseen" quality="3" />
     <passive id="3" name="Hydrokinesis" gfx="item_hydrokinesis.png" description="Let your mind create water" quality="4" />
     <passive id="4" name="Clyde Pills" gfx="item_clydepills.png" description="Yum yum pills!" quality="3" />
+    <passive id="5" name="Cult Following" gfx="item_clydepills.png" description="Yum yum pills!" quality="3" />
 </items>
