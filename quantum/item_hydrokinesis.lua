@@ -1,20 +1,27 @@
-Quantum.QW = {}
+Quantum.Hydrokinesis = {}
+local HK = Quantum.Hydrokinesis
 
 ---@class UTILS
-Quantum.QW.UTILS = include("quantum.utils")
+HK.UTILS = include("quantum.utils")
 
-Quantum.QW.ID = Isaac.GetItemIdByName("Hydrokinesis")
+HK.ID = Isaac.GetItemIdByName("Hydrokinesis")
 
-Quantum.QW.Luck = {}
-local LUCK = Quantum.QW.Luck
+HK.Luck = {}
+local LUCK = HK.Luck
 
+-- Base chance for a tear to spawn
 LUCK.BASE_CHANCE = 0.2
+-- Additional chance for extra copies
 LUCK.ADD_CHANCE = 0.1
+-- Chance for every Luck the player has
 LUCK.MULTIPLIER = 0.012
+-- Minimum chance for a tear to spawn
 LUCK.MIN_CHANCE = 0.05
+-- Maximum chance for a tear to spawn
 LUCK.MAX_CHANCE = 0.8
 
-Quantum.QW.ROOM_MULTIPLIER = {
+-- Multiplier for bigger rooms
+HK.ROOM_MULTIPLIER = {
     [RoomShape.ROOMSHAPE_1x1] = 1,
     [RoomShape.ROOMSHAPE_IH] = 0.75,
     [RoomShape.ROOMSHAPE_IV] = 0.75,
@@ -29,7 +36,8 @@ Quantum.QW.ROOM_MULTIPLIER = {
     [RoomShape.ROOMSHAPE_LBR] = 3,
 }
 
-Quantum.QW.VALID_WEAPONS = {
+-- Which weapons will trigger the item
+HK.VALID_WEAPONS = {
     [WeaponType.WEAPON_TEARS] = true,
     [WeaponType.WEAPON_BRIMSTONE] = true,
     [WeaponType.WEAPON_LASER] = true,
@@ -42,32 +50,35 @@ Quantum.QW.VALID_WEAPONS = {
     [WeaponType.WEAPON_FETUS] = true,
 }
 
-Quantum.QW.CONT_SPAWNED_COOLDOWN = 20
+-- How often continuously fired tear effects will spawn additional tears
+HK.CONT_SPAWNED_COOLDOWN = 20
 
-Quantum.QW.hasSpawned = false
+-- If a tear has been spawned by a continuously firing tear effect
+HK.hasSpawned = false
 
 include("quantum.item_hydrokinesis_def")
 include("quantum.item_hydrokinesis_tear")
 include("quantum.item_hydrokinesis_laser")
 
-
-function Quantum.QW:OnUpdate()
-    if Isaac.GetFrameCount() % Quantum.QW.CONT_SPAWNED_COOLDOWN == 0 then
-        Quantum.QW.hasSpawned = false
+---Runs every update frame
+function HK:OnUpdate()
+    -- Every X frames, reset whether a tear has been spawned
+    if Isaac.GetFrameCount() % HK.CONT_SPAWNED_COOLDOWN == 0 then
+        HK.hasSpawned = false
     end
 end
 
-Quantum:AddCallback(ModCallbacks.MC_POST_UPDATE, Quantum.QW.OnUpdate)
+Quantum:AddCallback(ModCallbacks.MC_POST_UPDATE, HK.OnUpdate)
 
 if EID then
     EID:addCollectible(
-        Quantum.QW.ID,
+        HK.ID,
         "{{Tearsize}} 20% chance to summon a tear randomly in the room when firing a tear" ..
         "#{{Bait}} Summoned tears are fired at the nearest enemy" ..
         "#{{Luck}} 80% chance at 50 Luck"
     )
 
     if EIDD then
-        EIDD:addDuplicateCollectible(Quantum.QW.ID, "Gives an additional 10% chance")
+        EIDD:addDuplicateCollectible(HK.ID, "Gives an additional 10% chance")
     end
 end

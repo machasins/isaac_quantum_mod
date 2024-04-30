@@ -16,8 +16,8 @@
 ---@field FLAG_REMOVE_LIST TearFlags[] What tear flags should be removed from the tear when it is spawned
 ---@field FLAG_READD_LIST TearFlags[] What tear flags should be removed until the tear is fired
 ---@field FLAG_MATCH_LIST TearFlags[] What tear flags should match the base flags in order to consider spawning (stops infinite tear spawning)
-Quantum.QW.Tear = {}
-local TEAR = Quantum.QW.Tear
+Quantum.Hydrokinesis.Tear = {}
+local TEAR = Quantum.Hydrokinesis.Tear
 
 TEAR.SPAWN_TIME = 30
 TEAR.FIRE_TIME = 50
@@ -82,8 +82,8 @@ TEAR.FLAG_MATCH_LIST = {
 ---@field WEAPON_EFFECT_SCALE table<TYPE, number> Percentage of the scale that the effect should have, based on laser type
 ---@field WEAPON_SCALE table<TYPE, number>  Percentage of the scale that the laser should have, based on laser type
 ---@field WEAPON_DURATION table<TYPE, number>  How long the laser should last, based on laser type
-Quantum.QW.Laser = {}
-local LASER = Quantum.QW.Laser
+Quantum.Hydrokinesis.Laser = {}
+local LASER = Quantum.Hydrokinesis.Laser
 
 LASER.DAMAGE = 0.4
 

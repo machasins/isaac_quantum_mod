@@ -78,6 +78,21 @@ end
 
 ---comment
 ---@param id CollectibleType
+---@return EntityPlayer?
+function utils.GetPlayerHasCollectible(id)
+    local playerNum = Game():GetNumPlayers()
+    for i = 0, playerNum - 1 do
+        local player = Isaac.GetPlayer(i)
+        if player:HasCollectible(id) then
+            return player
+        end
+    end
+
+    return nil
+end
+
+---comment
+---@param id CollectibleType
 ---@return number
 function utils.GetPlayerCollectibleNum(id)
     local ret = 0
@@ -92,17 +107,35 @@ end
 
 ---comment
 ---@param stat string
+---@param id? CollectibleType
 ---@return number
-function utils.GetHighestPlayerStat(stat)
+function utils.GetHighestPlayerStat(stat, id)
     local ret = math.mininteger
     local playerNum = Game():GetNumPlayers()
     for i = 0, playerNum - 1 do
         local player = Isaac.GetPlayer(i)
         local playerStat = player[stat]
-        ret = ret < playerStat and playerStat or ret
+        if id and player:HasCollectible(id) then
+            ret = ret < playerStat and playerStat or ret
+        end
     end
 
     return ret == math.mininteger and 0 or ret
+end
+
+---comment
+---@param id CollectibleType
+---@return RNG
+function utils.GetCollectibleRNG(id)
+    local playerNum = Game():GetNumPlayers()
+    for i = 0, playerNum - 1 do
+        local player = Isaac.GetPlayer(i)
+        if player:HasCollectible(id) then
+            return player:GetCollectibleRNG(id)
+        end
+    end
+
+    return Isaac.GetPlayer():GetCollectibleRNG(id)
 end
 
 ---comment
@@ -135,6 +168,19 @@ function utils.GetNearestEntity(position, default, condFunc, rankFunc)
         end
     end
     return closest
+end
+
+---comment
+---@param entities Entity[]
+---@param index integer
+---@return Entity
+function utils.GetEntityWithIndex(entities, index)
+    for _, e in pairs(entities) do
+        if e.Index == index then
+            return e
+        end
+    end
+    return entities[1]
 end
 
 ---@return UTILS

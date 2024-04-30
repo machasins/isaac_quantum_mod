@@ -1,8 +1,10 @@
----@class UTILS
-local UTILS = Quantum.QW.UTILS
-local LUCK = Quantum.QW.Luck
+local HK = Quantum.Hydrokinesis
 
-local LASER = Quantum.QW.Laser
+---@class UTILS
+local UTILS = HK.UTILS
+local LUCK = HK.Luck
+
+local LASER = HK.Laser
 LASER.normal = {}
 LASER.effect = {}
 LASER.spawned = {}
@@ -88,14 +90,14 @@ end
 ---@param position Vector The position to spawn the effect
 local function SpawnLaserEffect(laser, player, laserType, position)
     -- Spawn a laser that keeps track of the color the laser should be
-    local colorLaser = Isaac.Spawn(EntityType.ENTITY_LASER, laser.Variant, 0, Vector(50000,50000), Vector(0,0), nil):ToLaser()
+    local colorLaser = Isaac.Spawn(EntityType.ENTITY_LASER, laser.Variant, 0, Vector(50000,50000), Vector.Zero, nil):ToLaser()
     if colorLaser then
         -- Get associated data for the color laser
         local laserHash = colorLaser.Index
         RetrieveSpawnedLaserData(colorLaser, laserHash, laser, laserType, player)
         
         -- Spawn the effect that goes before the laser
-        local effect = Isaac.Spawn(EntityType.ENTITY_EFFECT, LASER.TO_EFFECT[laserType], 0, position, Vector(0,0), nil):ToEffect()
+        local effect = Isaac.Spawn(EntityType.ENTITY_EFFECT, LASER.TO_EFFECT[laserType], 0, position, Vector.Zero, nil):ToEffect()
         if effect then
             -- Get associated data for the effect
             local effectHash = effect.Index
@@ -144,7 +146,7 @@ local function HandleLaserFire(effect, player)
         laser.DisableFollowParent = true
     else
         -- Spawn Techology
-        laser = Isaac.Spawn(EntityType.ENTITY_LASER, effectData.laser.Variant, effectData.laser.SubType, effect.Position, Vector(0,0), player):ToLaser() or effectData.colorLaser
+        laser = Isaac.Spawn(EntityType.ENTITY_LASER, effectData.laser.Variant, effectData.laser.SubType, effect.Position, Vector.Zero, player):ToLaser() or effectData.colorLaser
         -- Set the scale of the laser
         laser.Size = laser.Size * 0.5
     end
@@ -152,7 +154,7 @@ local function HandleLaserFire(effect, player)
         -- Set position to the effect's position
         laser.Position = effect.Position
         -- Reset the offset
-        laser.PositionOffset = Vector(0,0)
+        laser.PositionOffset = Vector.Zero
         -- Adjust the laser so that it is above the effect
         --laser.DepthOffset = effect.DepthOffset + 1
         -- Angle the laser to aim at the correct position
@@ -194,7 +196,7 @@ end
 
 ---Runs when an effect updates
 ---@param effect EntityEffect
-function Quantum.QW:OnLaserEffectCreate(effect)
+function HK:OnLaserEffectCreate(effect)
     -- Check if the effect should be handled
     if not LASER.EFFECT_LIST[effect.Variant] then return end
 
@@ -207,7 +209,7 @@ end
 
 ---Runs then an effect is rendered
 ---@param effect EntityEffect
-function Quantum.QW:OnLaserEffectRender(effect)
+function HK:OnLaserEffectRender(effect)
     -- Check if the effect should be handled
     if not LASER.EFFECT_LIST[effect.Variant] then return end
 
@@ -221,7 +223,7 @@ end
 
 ---Runs when lasers are updated
 ---@param laser EntityLaser 
-function Quantum.QW:OnLaserCreate(laser)
+function HK:OnLaserCreate(laser)
     -- Check if laser should be handled
     if not LASER.HANDLE_LIST[laser.Variant] then return end
 
@@ -231,7 +233,7 @@ function Quantum.QW:OnLaserCreate(laser)
 
     -- Make sure the player spawned this laser and that they have the item
     local player = laser.SpawnerEntity and laser.SpawnerEntity:ToPlayer() or nil
-    if not (player and player:HasCollectible(Quantum.QW.ID)) then return end
+    if not (player and player:HasCollectible(HK.ID)) then return end
 
     -- Code that runs for spawned lasers, initialization
     if LASER.spawned[hash] then
@@ -241,7 +243,7 @@ function Quantum.QW:OnLaserCreate(laser)
     end
 
     -- Limit the amount of spawned lasers
-    if Quantum.QW.hasSpawned or not laser:IsFrame(Quantum.QW.CONT_SPAWNED_COOLDOWN, 1) then return end
+    if HK.hasSpawned or not laser:IsFrame(HK.CONT_SPAWNED_COOLDOWN, 1) then return end
 
     -- Get the type of the laser based on Variant and SubType
     local laserType = LASER.SUB_TO_TYPE[laser.SubType] or LASER.VAR_TO_TYPE[laser.Variant]
@@ -256,13 +258,13 @@ function Quantum.QW:OnLaserCreate(laser)
 
     -- Get the chance that the player will spawn a laser
     local spawnChance = UTILS.GetLuckChance(player.Luck,
-        LUCK.BASE_CHANCE + LUCK.ADD_CHANCE * (player:GetCollectibleNum(Quantum.QW.ID) - 1),
+        LUCK.BASE_CHANCE + LUCK.ADD_CHANCE * (player:GetCollectibleNum(HK.ID) - 1),
         LUCK.MULTIPLIER,
         LUCK.MIN_CHANCE,
         LUCK.MAX_CHANCE
-    ) * (Quantum.QW.ROOM_MULTIPLIER[game:GetLevel():GetCurrentRoom():GetRoomShape()] or 1)
+    ) * (HK.ROOM_MULTIPLIER[game:GetLevel():GetCurrentRoom():GetRoomShape()] or 1)
     -- Get the RNG object for the item
-    local rng = player:GetCollectibleRNG(Quantum.QW.ID)
+    local rng = player:GetCollectibleRNG(HK.ID)
     -- Randomly determine if another laser should be spawned
     local chance = rng:RandomFloat()
     if chance > spawnChance then
@@ -272,7 +274,7 @@ function Quantum.QW:OnLaserCreate(laser)
     end
 
     -- Laser passed the RNG check, generate a position in the room
-    local randomPos = Vector(0,0)
+    local randomPos = Vector.Zero
     if LASER.FOLLOW_PLAYER then
         -- The laser is following the player, it should spawn near the player
         randomPos = player.Position +
@@ -285,13 +287,13 @@ function Quantum.QW:OnLaserCreate(laser)
     SpawnLaserEffect(laser, player, laserType, randomPos)
 
     -- Mark that something has been spawned
-    Quantum.QW.hasSpawned = true
+    HK.hasSpawned = true
     LASER.normal[hash] = true
 end
 
 ---Runs when any entity is removed
 ---@param ent Entity
-function Quantum.QW:OnLaserRemove(ent)
+function HK:OnLaserRemove(ent)
     -- Get the hash of the entity
     local hash = ent.Index
     -- Remove any stored data for that hash
@@ -307,15 +309,15 @@ function Quantum.QW:OnLaserRemove(ent)
 end
 
 ---Runs when the room changes
-function Quantum.QW:ResetLaser()
+function HK:ResetLaser()
     -- Reset all databanks
     LASER.normal = {}
     LASER.spawned = {}
     LASER.effect = {}
 end
 
-Quantum:AddCallback(ModCallbacks.MC_POST_LASER_UPDATE, Quantum.QW.OnLaserCreate)
-Quantum:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, Quantum.QW.OnLaserEffectCreate)
-Quantum:AddCallback(ModCallbacks.MC_POST_EFFECT_RENDER, Quantum.QW.OnLaserEffectRender)
-Quantum:AddCallback(ModCallbacks.MC_POST_ENTITY_REMOVE, Quantum.QW.OnLaserRemove)
-Quantum:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Quantum.QW.ResetLaser)
+Quantum:AddCallback(ModCallbacks.MC_POST_LASER_UPDATE, HK.OnLaserCreate)
+Quantum:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, HK.OnLaserEffectCreate)
+Quantum:AddCallback(ModCallbacks.MC_POST_EFFECT_RENDER, HK.OnLaserEffectRender)
+Quantum:AddCallback(ModCallbacks.MC_POST_ENTITY_REMOVE, HK.OnLaserRemove)
+Quantum:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, HK.ResetLaser)

@@ -1,37 +1,37 @@
-
+---@class QUEUE
 local Queue = {}
+---@type table<number, fun(time:number?), number>[]
 Queue.queue = {}
+---@type ModReference
 Queue.Mod = RegisterMod("Queue", 1)
 
----@enum TimeRelation
-Queue.TimeRelation = {
-    ABSOLUTE = 0,
-    RELATIVE = 1
-}
-
-local Q_TIME = 1
+local Q_START = 1
 local Q_FUNC = 2
+local Q_END = 3
 
----comment
----@param time number 
----@param func function
----@param mode TimeRelation?
-function Queue:AddItem(time, func, mode)
-    mode = mode or Queue.TimeRelation.RELATIVE
+---Add an item to the queue
+---@param time number The time to call the function (in frames)
+---@param func fun(time:number?) The function to call
+---@param duration number? How many frames to call the function
+function Queue:AddItem(time, func, duration)
+    duration = duration or 0
+    local currentFrame = Isaac.GetFrameCount()
+    local startTime = currentFrame + time
+    local endTime = currentFrame + time + duration
 
-    if mode == Queue.TimeRelation.RELATIVE then
-        time = time + Isaac.GetFrameCount()
-    end
-
-    table.insert(Queue.queue, { time, func })
+    table.insert(Queue.queue, { startTime, func, endTime })
 end
 
+---Updating the queue
 function Queue:OnUpdate()
+    local frameCount = Isaac.GetFrameCount()
     for i, q in pairs(Queue.queue) do
         if q ~= nil then
-            if Isaac.GetFrameCount() >= q[Q_TIME] then
-                q[Q_FUNC]()
-                Queue.queue[i] = nil
+            if frameCount >= q[Q_START] then
+                q[Q_FUNC](frameCount - q[Q_START])
+                if frameCount >= q[Q_END] then
+                    Queue.queue[i] = nil
+                end
             end
         end
     end
