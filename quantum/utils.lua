@@ -22,6 +22,15 @@ function utils.Lerp(a, b, t)
     return a + (b - a) * math.min(math.max(t, 0.0), 1.0)
 end
 
+---Interpolate between two vectors based on time
+---@param a Vector Start
+---@param b Vector End
+---@param t number Time
+---@return Vector
+function utils.LerpV(a, b, t)
+    return a + (b - a) * t
+end
+
 ---Interpolate between two values based on time (Unclamped, t can be any value)
 ---@param a number Start
 ---@param b number End
