@@ -73,6 +73,7 @@ local function SpawnTear(tear, player, position)
         -- Initalize the tear's spawning animation
         newTear.FallingAcceleration = 0
         newTear.Scale = 0
+        newTear:GetSprite().Color.A = 0
         newTear.Height = TEAR.INITIAL_HEIGHT
         newTear.Velocity = Vector(0,0.000001)
     end
@@ -85,7 +86,7 @@ local function HandleSpawnAnimation(tear, tearData)
     -- Lerp the scale of the tear
     tear.Scale = UTILS.Lerp(0, tearData.originalScale, tear.FrameCount / TEAR.SPAWN_TIME)
     -- Lerp the alpha of the tear
-    tear:GetSprite().Color.A = UTILS.Lerp(0, tearData.originalAlpha, tear.FrameCount / TEAR.SPAWN_TIME * 3)
+    tear:GetSprite().Color.A = UTILS.Lerp(0, tearData.originalAlpha, tear.FrameCount / TEAR.SPAWN_TIME * 1.5)
     -- Make sure the tear doesn't fall
     tear.FallingAcceleration = -0.1
     -- Lerp the movement of the tear, going upwards
@@ -103,7 +104,7 @@ local function HandleTearShot(tear, player)
     -- Check if there is an enemy
     if enemy ~= nil then
         -- Shoot the tear towards the enemy
-        velocity = ((enemy.Position + (enemy.Velocity * tear.Position:Distance(enemy.Position) * 0.1)) - tear.Position):Normalized()
+        velocity = (enemy.Position - tear.Position):Normalized()
     else
         -- Shoot the tear in the direction the player is shooting
         velocity = player:GetAimDirection():Normalized()

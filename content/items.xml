@@ -4,5 +4,7 @@
     <passive id="3" name="Hydrokinesis" gfx="item_hydrokinesis.png" description="Let your mind create water" quality="4" />
     <passive id="4" name="Clyde Pills" gfx="item_clydepills.png" description="Yum yum pills!" quality="3" />
     <passive id="5" name="Cult Following" gfx="item_clydepills.png" description="Glory to the crying king" quality="3" />
-    <passive id="6" name="Heart to Heart" gfx="item_clydepills.png" description="Share their feelings" quality="3" />
+    <passive id="6" name="Heart to Heart" gfx="item_clydepills.png" description="Empathy hurts" quality="3" />
+    <passive id="7" name="Frying Pan" gfx="item_clydepills.png" description="Such a greasy sound" quality="4" />
+    <passive id="8" name="Sacrificer" gfx="item_clydepills.png" description="Tears for the tear god" quality="3" />
 </items>

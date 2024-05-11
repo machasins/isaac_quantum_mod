@@ -3,9 +3,9 @@ local PR = Quantum.PickupReroll
 local game = Game()
 
 ---@type UTILS
-local UTILS = include("quantum.utils")
+local UTILS = Quantum.UTILS
 ---@type QUEUE
-local QUEUE = include("quantum.sys_queue")
+local QUEUE = Quantum.QUEUE
 
 -- ID of the item
 PR.ID = Isaac.GetItemIdByName("Butterfly's Effect")
@@ -87,7 +87,7 @@ function PR:PickupUpdate()
                 -- If the player has not held up an item in the previous frame
                 if not save.playerHasItem[i] then
                     -- Queue the reroll to happen in five frames (prevents empty item pedestals from generating new items)
-                    QUEUE:AddItem(5, PR.RerollRoom)
+                    QUEUE:AddItem(5, 0, PR.RerollRoom, QUEUE.UpdateType.Update)
                     -- Mark that the player has picked up an item
                     save.playerHasItem[i] = true
                 end

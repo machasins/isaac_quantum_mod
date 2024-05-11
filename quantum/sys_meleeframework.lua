@@ -1,0 +1,12 @@
+-- CustomCallbacks
+---- On swing
+---- On hold swing
+-- Sprite synergies
+---- sprite to load
+---- item to require
+-- Options
+---- Swing, fire, both
+---- damage ticks
+---- cooldowns
+-- Overrides
+-- 

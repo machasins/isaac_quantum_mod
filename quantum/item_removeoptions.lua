@@ -2,9 +2,10 @@ Quantum.RemoveOptions = {}
 local RO = Quantum.RemoveOptions
 
 RO.ID = Isaac.GetItemIdByName("Quantum Scissors")
-local QUEUE = include("quantum.sys_queue")
 ---@type UTILS
-local UTILS = include("quantum.utils")
+local UTILS = Quantum.UTILS
+---@type QUEUE
+local QUEUE = Quantum.QUEUE
 
 RO.REMOVE_CHANCE = 0.1
 RO.ADDITIONAL_CHANCE = 0.1
@@ -58,11 +59,11 @@ function RO:RemoveOptions(pickup)
                     -- Remove the item from options
                     pickup.OptionsPickupIndex = 0
                     -- Spawn an effect to indicate it was removed
-                    QUEUE:AddItem(RO.EFFECT_SPAWN_DELAY, function()
+                    QUEUE:AddItem(RO.EFFECT_SPAWN_DELAY, 0, function()
                         local effect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF02, 0, pickup.Position, Vector.Zero, nil)
                         effect:GetSprite().Color:SetOffset(0,1,1)
                         effect:GetSprite().Color.A = 0.75
-                    end)
+                    end, QUEUE.UpdateType.Update)
                     -- Remove the effect from Choice Viewer
                     RemoveAdditionalEffect(RO.VISIBLE_OPTIONS_EFFECT, pickup.Index)
                 end

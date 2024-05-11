@@ -2,10 +2,10 @@ Quantum.EnemyLink = {}
 local EL = Quantum.EnemyLink
 
 EL.ID = Isaac.GetItemIdByName("Heart to Heart")
----@type QUEUE
-local QUEUE = include("quantum.sys_queue")
 ---@type UTILS
-local UTILS = include("quantum.utils")
+local UTILS = Quantum.UTILS
+---@type QUEUE
+local QUEUE = Quantum.QUEUE
 
 EL.BASE_CHANCE = 0.05
 EL.LUCK_MULT = 0.01
@@ -40,11 +40,10 @@ local function SpawnEffect(enemy1, enemy2)
         local effect = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.ENEMY_SOUL, 0, pos, Vector.Zero, enemy1):ToEffect()
         if effect then
             effect:SetTimeout(math.maxinteger)
-            QUEUE:AddItem(0,
+            QUEUE:AddItem(0, EL.EFFECT_FADE_TIME,
             function(t)
                 effect:GetSprite().Color.A = t / EL.EFFECT_FADE_TIME * EL.EFFECT_ALPHA
-            end,
-            EL.EFFECT_FADE_TIME)
+            end, QUEUE.UpdateType.Update)
             effect:GetSprite().Color = EL.EFFECT_COLOR
             effect:GetSprite().Color.A = 0
             effect.DepthOffset = -1
@@ -126,15 +125,14 @@ function EL:OnUpdate()
         if enemies[1].Ref:IsDead() or enemies[2].Ref:IsDead() then
             enemyEffects[effectList] = nil
             for _, effect in pairs(effectList) do
-                QUEUE:AddItem(0,
+                QUEUE:AddItem(0, EL.EFFECT_FADE_TIME,
                 function(t)
                     effect.Ref:GetSprite().Color.A = (1.0 - t / EL.EFFECT_FADE_TIME) * EL.EFFECT_ALPHA
-                end,
-                EL.EFFECT_FADE_TIME)
-                QUEUE:AddItem(EL.EFFECT_FADE_TIME,
+                end, QUEUE.UpdateType.Update)
+                QUEUE:AddItem(EL.EFFECT_FADE_TIME, 0,
                 function()
                     effect.Ref:Remove()
-                end)
+                end, QUEUE.UpdateType.Update)
             end
         else
             if enemies[1].Ref:IsFrame(EL.ENEMY_COLOR_INTERVAL, 1) then
@@ -142,22 +140,20 @@ function EL:OnUpdate()
                 local color2 = enemies[2].Ref:GetSprite().Color
                 local origColor1 = Color(color1.R, color1.G, color1.B, color1.A)
                 local origColor2 = Color(color2.R, color2.G, color2.B, color2.A)
-                QUEUE:AddItem(0,
+                QUEUE:AddItem(0, EL.ENEMY_COLOR_DUR,
                 function(t)
                     if enemies[1].Ref and enemies[2].Ref then
                         enemies[1].Ref:GetSprite().Color = Color.Lerp(origColor1, EL.ENEMY_COLOR, t / EL.ENEMY_COLOR_DUR)
                         enemies[2].Ref:GetSprite().Color = Color.Lerp(origColor2, EL.ENEMY_COLOR, t / EL.ENEMY_COLOR_DUR)
                     end
-                end,
-                EL.ENEMY_COLOR_DUR)
-                QUEUE:AddItem(EL.ENEMY_COLOR_DUR,
+                end, QUEUE.UpdateType.Update)
+                QUEUE:AddItem(EL.ENEMY_COLOR_DUR, EL.ENEMY_COLOR_DUR,
                 function(t)
                     if enemies[1].Ref and enemies[2].Ref then
                         enemies[1].Ref:GetSprite().Color = Color.Lerp(EL.ENEMY_COLOR, origColor1, t / EL.ENEMY_COLOR_DUR)
                         enemies[2].Ref:GetSprite().Color = Color.Lerp(EL.ENEMY_COLOR, origColor2, t / EL.ENEMY_COLOR_DUR)
                     end
-                end,
-                EL.ENEMY_COLOR_DUR)
+                end, QUEUE.UpdateType.Update)
             end
             for i, effect in pairs(effectList) do
                 effect.Ref.Position = UTILS.LerpV(enemies[1].Ref.Position, enemies[2].Ref.Position, (i + 1) / (EL.EFFECT_AMOUNT + 2))
