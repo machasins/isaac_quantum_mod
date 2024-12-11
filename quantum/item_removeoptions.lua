@@ -83,8 +83,4 @@ if EID then
         "#This includes Alt Path treasure rooms, all Options items, Angel rooms, Boss Rush, etc." ..
         "#{{Luck}} 50% chance at 20 Luck"
     )
-
-    if EIDD then
-        EIDD:addDuplicateCollectible(RO.ID, "Gives an additional 10% chance")
-    end
 end

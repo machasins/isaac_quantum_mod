@@ -108,8 +108,4 @@ if EID then
         "#Rerolls when collecting: #{{Blank}} {{Heart}}, {{Coin}}, {{Bomb}}, {{Key}}, {{Battery}}, {{PoopPickup}}, {{Collectible}}" ..
         "#Does not reroll when collecting: #{{Blank}} {{Pill}}, {{Card}}, {{Rune}}, {{Trinket}}, {{GrabBag}}, {{Chest}}"
     )
-
-    if EIDD then
-        EIDD:addDuplicateCollectible(PR.ID, "No additional effect")
-    end
 end

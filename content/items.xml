@@ -1,10 +1,63 @@
 <items gfxroot="gfx/items/" deathanm2="gfx/death_items.anm2" version="1">
-    <passive id="1" name="Butterfly's Effect" gfx="item_butterflys_effect.png" description="Slight changes magnify" quality="4" />
-    <passive id="2" name="Quantum Scissors" gfx="item_quantum_scissors.png" description="Cut the bonds of the unseen" quality="3" />
-    <passive id="3" name="Hydrokinesis" gfx="item_hydrokinesis.png" description="Let your mind create water" quality="4" />
-    <passive id="4" name="Clyde Pills" gfx="item_clydepills.png" description="Yum yum pills!" quality="3" />
-    <passive id="5" name="Cult Following" gfx="item_clydepills.png" description="Glory to the crying king" quality="3" />
-    <passive id="6" name="Heart to Heart" gfx="item_clydepills.png" description="Empathy hurts" quality="3" />
-    <passive id="7" name="Frying Pan" gfx="item_clydepills.png" description="Such a greasy sound" quality="4" />
-    <passive id="8" name="Sacrificer" gfx="item_clydepills.png" description="Tears for the tear god" quality="3" />
+    <passive id="1" name="Butterfly's Effect"
+        description="Slight changes magnify"
+        gfx="item_butterflys_effect.png"
+        quality="4" 
+        />
+    <passive id="2" name="Quantum Scissors"   
+        description="Cut the bonds of the unseen" 
+        gfx="item_quantum_scissors.png"  
+        quality="3" 
+        />
+    <passive id="3" name="Hydrokinesis"       
+        description="Let your mind cry too"       
+        gfx="item_hydrokinesis.png"      
+        quality="4" 
+        />
+    <passive id="4" name="Clyde Pills"        
+        description="Yum yum pills!"              
+        gfx="item_clydepills.png"        
+        quality="3" 
+        />
+    <passive id="5" name="Cult Following"     
+        description="Glory to the crying king"    
+        gfx="item_clydepills.png"        
+        quality="4" 
+        />
+    <passive id="6" name="Heart to Heart"     
+        description="Empathy hurts"               
+        gfx="item_clydepills.png"        
+        quality="3" 
+        />
+    <passive id="7" name="Forgotten Friend"   
+        description="Bones for the bone god"      
+        gfx="item_clydepills.png"        
+        quality="3" 
+        />
+    <passive id="8" name="Big Gulp"           
+        description="Free refills"                
+        gfx="item_clydepills.png"        
+        quality="3" 
+        />
+    <active  id="9" name="Coin Collection"    
+        description="A penny for your thoughts"   
+        gfx="item_clydepills.png"        
+        quality="3" 
+        chargetype="normal" 
+        maxcharges="4" 
+        />
+    <active  id="10" name="Worm Bucket"    
+        description="Gone fishing"   
+        gfx="item_clydepills.png"        
+        quality="3" 
+        chargetype="normal" 
+        maxcharges="4" 
+        />
+    <active  id="11" name="Artifical Bloom"    
+        description="Induced metamorphosis"   
+        gfx="item_clydepills.png"        
+        quality="4" 
+        chargetype="normal" 
+        maxcharges="6" 
+        />
 </items>

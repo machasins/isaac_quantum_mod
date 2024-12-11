@@ -179,8 +179,4 @@ if EID then
         "#{{BrokenHeart}} When a linked enemy dies, it damages the other for a percentage of its health" ..
         "#{{Luck}} 25% chance at 20 Luck"
     )
-
-    if EIDD then
-        EIDD:addDuplicateCollectible(EL.ID, "Gives a chance to link another two enemies")
-    end
 end

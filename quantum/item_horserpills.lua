@@ -234,8 +234,4 @@ if EID then
         "{{Pill}} All pills become horse pills" ..
         "#↓ After using a pill, all pill effects are randomized"
     )
-
-    if EIDD then
-        EIDD:addDuplicateCollectible(HP.ID, "Gives an additional 10% chance")
-    end
 end

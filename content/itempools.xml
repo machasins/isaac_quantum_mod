@@ -10,6 +10,8 @@
     <Pool Name="shop">
         <!-- Clyde Pills, Horse Tranquilizer, Blank Prescription -->
         <Item Name="Clyde Pills" Weight="1.0" DecreaseBy="1.0" RemoveOn="0.05" />
+        <!-- Big Gulp -->
+        <Item Name="Big Gulp" Weight="1.0" DecreaseBy="1.0" RemoveOn="0.05" />
     </Pool>
     <Pool Name="secret">
         <!-- Emergent Gravity, Butterfly's Effect,  -->
@@ -21,7 +23,9 @@
     </Pool>
     <Pool Name="devil">
         <!-- Cult Following  -->
-        <Item Name="Cult Following" Weight="1.0" DecreaseBy="1.0" RemoveOn="0.05" />
+        <Item Name="Cult Following" Weight="0.1" DecreaseBy="0.1" RemoveOn="0.05" />
+        <!-- Forgotten Friend  -->
+        <Item Name="Forgotten Friend" Weight="1.0" DecreaseBy="1.0" RemoveOn="0.05" />
     </Pool>
     <Pool Name="angel">
         <!-- Heart to Heart  -->

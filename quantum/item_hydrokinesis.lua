@@ -77,8 +77,4 @@ if EID then
         "#{{Bait}} Summoned tears are fired at the nearest enemy" ..
         "#{{Luck}} 80% chance at 50 Luck"
     )
-
-    if EIDD then
-        EIDD:addDuplicateCollectible(HK.ID, "Gives an additional 10% chance")
-    end
 end
