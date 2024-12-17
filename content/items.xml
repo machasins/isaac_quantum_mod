@@ -60,4 +60,19 @@
         chargetype="normal" 
         maxcharges="6" 
         />
+    <active  id="12" name="Room Hack"    
+        description="commence hack"   
+        gfx="item_clydepills.png"        
+        quality="2" 
+        chargetype="normal" 
+        maxcharges="2" 
+        />
+    <trinket  id="1" name="Orbit Worm"    
+        description="Wibble Wobble"   
+        gfx="trinket_orbit_worm.png"
+        />
+    <trinket  id="2" name="Trail Worm"    
+        description="Ssslither"
+        gfx="trinket_orbit_worm.png"
+        />
 </items>

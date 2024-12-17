@@ -1,5 +1,5 @@
-Quantum.ArtificalBloom = {}
-local WB = Quantum.ArtificalBloom
+Quantum.WormBucket = {}
+local WB = Quantum.WormBucket
 local game = Game()
 
 -- ID of the item

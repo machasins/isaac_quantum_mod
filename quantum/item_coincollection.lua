@@ -1,5 +1,5 @@
-Quantum.ArtificalBloom = {}
-local CC = Quantum.ArtificalBloom
+Quantum.CoinCollection = {}
+local CC = Quantum.CoinCollection
 local game = Game()
 
 -- ID of the item

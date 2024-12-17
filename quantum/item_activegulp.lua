@@ -1,5 +1,5 @@
-Quantum.ArtificalBloom = {}
-local BG = Quantum.ArtificalBloom
+Quantum.ActiveGulp = {}
+local BG = Quantum.ActiveGulp
 local game = Game()
 
 ---@type UTILS
