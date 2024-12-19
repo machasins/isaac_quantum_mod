@@ -9,6 +9,8 @@ LASER.normal = {}
 LASER.effect = {}
 LASER.spawned = {}
 
+local GetData = UTILS.FuncGetData("q_hk_laser")
+
 local game = Game()
 
 ---Save data needed for spawning the laser
@@ -20,13 +22,14 @@ local game = Game()
 ---@param player EntityPlayer The player that spawned the effect
 local function RetrieveSpawnedEffectData(effect, hash, laser, colorLaser, laserType, player)
     -- Initialize data
-    LASER.effect[hash] = {}
-    LASER.effect[hash].player = player         -- Keep track of the player that spawned the laser
-    LASER.effect[hash].laser = laser           -- Keep track of the inital laser
-    LASER.effect[hash].colorLaser = colorLaser -- Keep track of the colored laser
-    LASER.effect[hash].laserType = laserType   -- Keep track of the type of the laser
+    LASER.effect[hash] = true
+    local effectData = GetData(effect)
+    effectData.player = player         -- Keep track of the player that spawned the laser
+    effectData.laser = laser           -- Keep track of the inital laser
+    effectData.colorLaser = colorLaser -- Keep track of the colored laser
+    effectData.laserType = laserType   -- Keep track of the type of the laser
     -- Keep track of the inital color of the laser
-    LASER.effect[hash].laserColor = colorLaser:GetSprite().Color
+    effectData.laserColor = colorLaser:GetSprite().Color
     -- Remove any spawner entity to stop any AntiGrav callbacks
     effect.SpawnerEntity = nil
     -- Set the length of the effect
@@ -39,9 +42,9 @@ local function RetrieveSpawnedEffectData(effect, hash, laser, colorLaser, laserT
         flagsToRemove = flagsToRemove | f
     end
     -- Remove the flags from the inital laser, for use when spawning the laser
-    LASER.effect[hash].removeFlags = playerTearEffects & flagsToRemove
+    effectData.removeFlags = playerTearEffects & flagsToRemove
     -- For use if laser follows the player, sets original offset
-    LASER.effect[hash].offsetPosition = effect.Position - player.Position
+    effectData.offsetPosition = effect.Position - player.Position
 end
 
 ---Sets all data that needs to for the Colored laser
@@ -52,9 +55,10 @@ end
 ---@param player EntityPlayer The player
 local function RetrieveSpawnedLaserData(colorLaser, hash, laser, laserType, player)
     -- Initalize data
-    LASER.spawned[hash] = {}
+    LASER.spawned[hash] = true
+    local laserData = GetData(laser)
     -- Keep track of the player that spawned this laser
-    LASER.spawned[hash].player = player
+    laserData.player = player
     -- Set the timeout for the laser [Function definition is incorrect]
 ---@diagnostic disable-next-line: param-type-mismatch
     colorLaser:SetTimeout(LASER.TIME[laserType].FIRE + 60)
@@ -74,7 +78,7 @@ end
 ---@param effect EntityEffect The effect to colorize
 local function SetEffectColor(effect)
     -- Get the effect's data
-    local effectData = LASER.effect[effect.Index]
+    local effectData = GetData(effect)
     -- Set the effect's color to the color of the colorLaser
     effect:GetSprite().Color = effectData.colorLaser:GetSprite().Color
     -- Control intial spawn alpha
@@ -130,7 +134,7 @@ local function HandleLaserFire(effect, player)
     end
 
     -- Create the laser
-    local effectData = LASER.effect[effect.Index]
+    local effectData = GetData(effect)
     local laser = nil
     -- Handle special case of TECH X, cannot be made with Isaac.Spawn
     if effectData.laserType == LASER.TYPE.TECHX then
@@ -179,10 +183,9 @@ end
 
 ---Handles the animations of the effect and eventually firing the laser
 ---@param effect EntityEffect The effect to modify
----@param hash number The hash of the effect
-local function HandleSpawnedEffect(effect, hash)
+local function HandleSpawnedEffect(effect)
     -- Get data for the effect
-    local effectData = LASER.effect[hash]
+    local effectData = GetData(effect)
     -- If the laser is set to follow the player, adjust the effect's velocity accordingly
     if LASER.FOLLOW_PLAYER and effect.FrameCount < LASER.TIME[effectData.laserType].FIRE then
         local realPos = effectData.player.Position + effectData.offsetPosition
@@ -204,7 +207,7 @@ function HK:OnLaserEffectCreate(effect)
     local hash = effect.Index
     if LASER.effect[hash] == nil then return end
     -- Handle animations and spawning of laser
-    HandleSpawnedEffect(effect, hash)
+    HandleSpawnedEffect(effect)
 end
 
 ---Runs then an effect is rendered

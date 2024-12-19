@@ -7,6 +7,8 @@ local UTILS = Quantum.UTILS
 ---@type QUEUE
 local QUEUE = Quantum.QUEUE
 
+local GetData = UTILS.FuncGetData("q_cf")
+
 CF.ID = Isaac.GetItemIdByName("Cult Following")
 
 -- Random number to signify that this is a unique cultist
@@ -56,13 +58,13 @@ local function SetCultistFlags(cultist)
     -- Initialize the revive room cap to the maximum
     cultist:ToNPC().I2 = CF.MAX_REVIVE_ROOM
     -- Initialize targeting data
-    local data = cultist:GetData()
-    data.q_cf_target = nil
-    data.q_cf_hasTarget = false
-    data.q_cf_startRevive = false
-    data.q_cf_isReviving = false
-    data.q_cf_rechargeTime = math.maxinteger
-    data.q_cf_reviveTimeout = math.maxinteger
+    local data = GetData(cultist)
+    data.target = nil
+    data.hasTarget = false
+    data.startRevive = false
+    data.isReviving = false
+    data.rechargeTime = math.maxinteger
+    data.reviveTimeout = math.maxinteger
 end
 
 ---Handle spawning the cultist initially
@@ -90,7 +92,7 @@ local function SpawnCultist(player)
         table.insert(save.cf_playerToCultist[player.Index .. ""], cultist.Index)
         -- Set the cultists flags
         SetCultistFlags(cultist)
-        cultist:GetData().q_cf_index = #save.cf_playerToCultist[player.Index .. ""]
+        GetData(cultist).index = #save.cf_playerToCultist[player.Index .. ""]
     end
 end
 
@@ -107,7 +109,7 @@ local function HandleCharmedEnemies()
         if e:HasEntityFlags(EntityFlag.FLAG_FRIENDLY) and e:IsEnemy() then
             -- Check if the enemy has lived too long
             if e.SubType ~= CF.SUBTYPE and e.FrameCount > CF.CHARMED_MAX_LIFESPAN or (e:IsInvincible() and e.FrameCount > CF.CHARMED_MAX_LIFESPAN_INVINCIBLE) then
-                if not e:GetData().q_cf_beingKilled then
+                if not GetData(e).beingKilled then
                     -- Handle death animation
                     -- Lerp the color and velocity of the enemy
                     QUEUE:AddItem(0, 30, function (t)
@@ -120,7 +122,7 @@ local function HandleCharmedEnemies()
                         e:Remove()
                         Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF02, 2, e.Position, Vector.Zero, e)
                     end, QUEUE.UpdateType.Update)
-                    e:GetData().q_cf_beingKilled = true
+                    GetData(e).beingKilled = true
                 end
                 
             else
@@ -141,7 +143,7 @@ local function HandleCultistBehavior(entity)
         -- The color of the cultist
         local color = CF.NORMAL_COLOR
         -- The cultist's tracking data
-        local data = entity:GetData()
+        local data = GetData(entity)
         -- The current room of the floor
         local currentRoom = game:GetLevel():GetCurrentRoom()
         -- The cultist's owner
@@ -154,7 +156,7 @@ local function HandleCultistBehavior(entity)
         -- OR the room is clear and no actions are currently being taken
         if charmedEnemies >= CF.MAX_CHARMED_TOTAL * collectibleNum
             or entity.I2 >= CF.MAX_REVIVE_ROOM
-            or currentRoom:IsClear() and not (data.q_cf_hasTarget or data.q_cf_startRevive or data.q_cf_isReviving) then
+            or currentRoom:IsClear() and not (data.hasTarget or data.startRevive or data.isReviving) then
             -- Set the cultist's internal revive flag to zero
             -- This stops the cultist from ever attempting to revive enemies
             entity.I1 = 0
@@ -163,35 +165,35 @@ local function HandleCultistBehavior(entity)
         end
         -- Check if the current room has active enemies and the cultist is able to revive enemies
         -- Also make sure the cultist is not doing anything else
-        if not currentRoom:IsClear() and entity.I2 < CF.MAX_REVIVE_ROOM and not (data.q_cf_hasTarget or data.q_cf_startRevive or data.q_cf_isReviving) then
+        if not currentRoom:IsClear() and entity.I2 < CF.MAX_REVIVE_ROOM and not (data.hasTarget or data.startRevive or data.isReviving) then
             -- Set the target of the cultist to a non-charmed enemy in the room
-            data.q_cf_target = UTILS.GetNearestEntity(currentRoom:GetRandomPosition(1), nil, function (e)
+            data.target = UTILS.GetNearestEntity(currentRoom:GetRandomPosition(1), nil, function (e)
                 return UTILS.IsTargetableEnemy(e) and not e:HasEntityFlags(EntityFlag.FLAG_FRIENDLY)
             end)
             -- If targeting was successful, mark that the cultist has a target
-            data.q_cf_hasTarget = data.q_cf_target ~= nil
+            data.hasTarget = data.target ~= nil
         end
         -- Check if the cultist has a target and the target is not dead
-        if data.q_cf_hasTarget and data.q_cf_target and not data.q_cf_target:IsDead() then
+        if data.hasTarget and data.target and not data.target:IsDead() then
             -- The rotation offset for other cultists
-            local offset = data.q_cf_index * (360 / #save.cf_playerToCultist[player.Index .. ""])
+            local offset = data.index * (360 / #save.cf_playerToCultist[player.Index .. ""])
             -- Set the target position for the cultist to circle around the enemy
-            entity.TargetPosition = data.q_cf_target.Position + Vector(1,0):Rotated((entity.FrameCount * 0.75) % 360 + offset) * 50
+            entity.TargetPosition = data.target.Position + Vector(1,0):Rotated((entity.FrameCount * 0.75) % 360 + offset) * 50
             -- Set the internal revive flag to zero to stop the cultist from reviving other enemies
             entity.I1 = 0
         -- Check if the cultist has a target and they are dead
-        elseif data.q_cf_hasTarget and data.q_cf_target and data.q_cf_target:IsDead() then
+        elseif data.hasTarget and data.target and data.target:IsDead() then
             -- Mark that the cultist is no longer targeting an enemy
-            data.q_cf_hasTarget = false
+            data.hasTarget = false
             -- Signal that the revive process has started
-            data.q_cf_startRevive = true
+            data.startRevive = true
             -- Mark the time that the revive process will time out (only if unsuccessful)
-            data.q_cf_reviveTimeout = Isaac.GetFrameCount() + CF.REVIVE_TIMEOUT
+            data.reviveTimeout = Isaac.GetFrameCount() + CF.REVIVE_TIMEOUT
         end
         -- Check if the revive process has started
-        if data.q_cf_startRevive then
+        if data.startRevive then
             -- Set the cultist's target position to the position of the enemy that was previously followed
-            entity.TargetPosition = data.q_cf_target.Position
+            entity.TargetPosition = data.target.Position
             -- Set the cultist's internal revive flag to two
             -- This signals the cultist that a revive should be processed
             entity.I1 = 2
@@ -202,20 +204,20 @@ local function HandleCultistBehavior(entity)
             -- This means the cultist has traveled to the dead enemy's position and started to revive them
             if entity.State == NpcState.STATE_SUMMON then
                 -- Mark the inital revive process completed
-                data.q_cf_startRevive = false
+                data.startRevive = false
                 -- Mark the actual revival ongoing
-                data.q_cf_isReviving = true
+                data.isReviving = true
             end
             -- Check if the revive timeout has been triggered
             if Isaac.GetFrameCount() > data.q_cf_reviveTimeout then
                 -- Reset the target for the cultist
-                data.q_cf_target = nil
+                data.target = nil
                 -- Mark that the cultist is no longer targeting an enemy
-                data.q_cf_hasTarget = false
+                data.hasTarget = false
                 -- Mark the revive starting process as ended
-                data.q_cf_startRevive = false
+                data.startRevive = false
                 -- Reset the revive timeout
-                data.q_cf_reviveTimeout = math.maxinteger
+                data.reviveTimeout = math.maxinteger
                 -- Set the internal revive flag to idle (normal state)
                 entity.I1 = 1
             end
@@ -231,32 +233,32 @@ local function HandleCultistBehavior(entity)
                 -- Increase the amount of revives used in the room
                 entity.I2 = entity.I2 + 1
                 -- Set the revive recharge time
-                -- data.q_cf_rechargeTime = Isaac.GetFrameCount() + CF.REVIVE_RECHARGE_TIME
+                -- data.rechargeTime = Isaac.GetFrameCount() + CF.REVIVE_RECHARGE_TIME
             end
         end
         -- Check if the cultist has finished the revive animation
-        if data.q_cf_isReviving and entity.State ~= NpcState.STATE_SUMMON then
+        if data.isReviving and entity.State ~= NpcState.STATE_SUMMON then
             -- Reset the target for the cultist
-            data.q_cf_target = nil
+            data.target = nil
             -- Mark that the cultist is no longer targeting an enemy
-            data.q_cf_hasTarget = false
+            data.hasTarget = false
             -- Mark the revive as completed
-            data.q_cf_isReviving = false
+            data.isReviving = false
         end
         -- Check if the recharge time has been reached, and that the cultist is out of revives for the room
-        --[[ if entity.I2 >= CF.MAX_REVIVE_ROOM and Isaac.GetFrameCount() > data.q_cf_rechargeTime then
+        --[[ if entity.I2 >= CF.MAX_REVIVE_ROOM and Isaac.GetFrameCount() > data.rechargeTime then
             -- Reset the amount of revives in the room
             entity.I2 = 0
             -- Reset the recharge timer
-            data.q_cf_rechargeTime = math.maxinteger
+            data.rechargeTime = math.maxinteger
         end ]]
         -- Check if the cultist has used up their revives for the room
         --   OR finding a target has failed
         --   OR the room is clear
         -- AND the cultist is not currently doing anything else
-        if (entity.I2 >= CF.MAX_REVIVE_ROOM or data.q_cf_target == nil or currentRoom:IsClear()) and not (data.q_cf_hasTarget or data.q_cf_startRevive or data.q_cf_isReviving) then
+        if (entity.I2 >= CF.MAX_REVIVE_ROOM or data.target == nil or currentRoom:IsClear()) and not (data.hasTarget or data.startRevive or data.isReviving) then
             -- The rotation offset for other cultists
-            local offset = data.q_cf_index * (360 / #save.cf_playerToCultist[player.Index .. ""])
+            local offset = data.index * (360 / #save.cf_playerToCultist[player.Index .. ""])
             -- Set the cultist's target position to circle around the player
             entity.TargetPosition = player.Position + Vector(1,0):Rotated((player.FrameCount * 0.75) % 360 + offset) * 50
         end
@@ -264,9 +266,9 @@ local function HandleCultistBehavior(entity)
         -- Make the cultist move faster when further away from the player
         local player_follow_mult = UTILS.Lerp(CF.PLAYER_FOLLOW_MULT, CF.ENEMY_FOLLOW_MULT, (entity.Position:Distance(player.Position) - 50) / 50)
         -- Adjust velocity based on current state
-        entity.Velocity = entity.Velocity * ((data.q_cf_hasTarget or data.q_cf_startRevive) and CF.ENEMY_FOLLOW_MULT or player_follow_mult)
+        entity.Velocity = entity.Velocity * ((data.hasTarget or data.startRevive) and CF.ENEMY_FOLLOW_MULT or player_follow_mult)
         -- Make the cultist face where they are going
-        local target_entity_position = (data.q_cf_hasTarget or data.q_cf_startRevive) and data.q_cf_target.Position or player.Position
+        local target_entity_position = (data.hasTarget or data.startRevive) and data.target.Position or player.Position
         local cross = target_entity_position:Cross(entity.Position)
         entity.FlipX = cross > 0 or math.abs(cross) < 5
         -- Lerp the color of the cultist towards the color they should be
@@ -346,13 +348,13 @@ function CF:OnNewRoom()
         -- Reset the amount of revives each cultist has used
         e:ToNPC().I2 = 0
         -- The tracking data for the cultist
-        local data = e:GetData()
+        local data = GetData(e)
         -- Reset all data
-        data.q_cf_target = nil
-        data.q_cf_hasTarget = false
-        data.q_cf_isReviving = false
-        data.q_cf_rechargeTime = math.maxinteger
-        data.q_cf_reviveTimeout = math.maxinteger
+        data.target = nil
+        data.hasTarget = false
+        data.isReviving = false
+        data.rechargeTime = math.maxinteger
+        data.reviveTimeout = math.maxinteger
     end
 end
 

@@ -3,7 +3,9 @@ local TW = Quantum.TrailWorm
 local game = Game()
 
 ---@class UTILS
-local utils = include("quantum.utils")
+local UTILS = Quantum.UTILS
+
+local GetData = UTILS.FuncGetData("q_tw")
 
 -- ID of the item
 TW.ID = Isaac.GetTrinketIdByName("Trail Worm")
@@ -27,12 +29,12 @@ function TW:OnTearUpdate(tear)
     -- Make sure the player exists and the player has the trinket
     if not (player and player:GetTrinketMultiplier(TW.ID) > 0) then return end
     -- Get custom data for the tear
-    local data = tear:GetData()
+    local data = GetData(tear)
     -- Check if this tear is an following tear
-    if data.q_tw_followTear ~= nil then
+    if data.followTear ~= nil then
         -- The tear entity this tear is following
         ---@type EntityTear
-        local followTear = data.q_tw_followTear.Entity:ToTear()
+        local followTear = data.followTear.Entity:ToTear()
         -- Check if the follow tear has fallen
         if not followTear:IsDead() then
             -- Copy the follow tear's height variables
@@ -42,17 +44,17 @@ function TW:OnTearUpdate(tear)
             -- Only run this on frame 1
             if tear.FrameCount == 1 then
                 -- Set the position of the tear to the correct inital position
-                tear.Position = followTear.Position - followTear.Velocity:Normalized() * (TW.FOLLOW_DISTANCE * followTear.Scale) * data.q_tw_followOffset
+                tear.Position = followTear.Position - followTear.Velocity:Normalized() * (TW.FOLLOW_DISTANCE * followTear.Scale) * data.followOffset
             end
             -- Set the velocity to follow around the tear
             tear.Velocity = followTear.Velocity
         end
         -- Lerp the scale tTWards the beginning of the tears life
-        --tear.Scale = utils.Lerp(0, data.q_tw_targetScale, (tear.FrameCount - (data.q_tw_followOffset - 1) * 5) / TW.GROW_FRAME_MAX)
+        --tear.Scale = utils.Lerp(0, data.targetScale, (tear.FrameCount - (data.followOffset - 1) * 5) / TW.GROW_FRAME_MAX)
     -- Check whether this tear can spawn additional following tears
-    elseif not data.q_tw_hasSpawnedfollowTear and tear.FrameCount <= TW.FRAME_CUTOFF then
+    elseif not data.hasSpawnedfollowTear and tear.FrameCount <= TW.FRAME_CUTOFF then
         -- Set that this tear has spawned other tears
-        data.q_tw_hasSpawnedfollowTear = true
+        data.hasSpawnedfollowTear = true
         -- The trinket multiplier for the player
         local mult = player:GetTrinketMultiplier(TW.ID)
         -- Spawn a tear for each level of multiplier the player has
@@ -71,11 +73,11 @@ function TW:OnTearUpdate(tear)
             -- Stop the tear from homing as much
             spawned_tear.HomingFriction = 1
             -- The data for the spawned tear
-            local spawned_data = spawned_tear:GetData()
+            local spawned_data = GetData(spawned_tear)
             -- Set the tear entity the spawned tear should follow
-            spawned_data.q_tw_followTear = EntityRef(tear)
+            spawned_data.followTear = EntityRef(tear)
             -- Set the offset for the spawned tear, with an additional offset based on the amount of tears already spawned
-            spawned_data.q_tw_followOffset = i + 1
+            spawned_data.followOffset = i + 1
         end
     end
 end

@@ -8,6 +8,7 @@ local KNIFE = HK.Knife
 KNIFE.normal = {}
 KNIFE.spawned = {}
 
+local GetData = UTILS.FuncGetData("q_hk_knife")
 local game = Game()
 
 ---Chooses a target for the knife to aim at
@@ -22,15 +23,29 @@ local function ChooseTarget(prevTarget, position)
     end
 end
 
-local function AimKnife(knife, knifeData, player, time, aimSpeed)
-    local target = ChooseTarget(knife:GetData().q_hk_knife_aimTarget, knife.Position)
-    knifeData.q_hk_knife_aimTarget = target
+---Aims the knife at a target
+---@param knife EntityKnife
+---@param knifeData table
+---@param player EntityPlayer
+---@param spinTime number
+---@param aimSpeed number
+local function AimKnife(knife, knifeData, player, spinTime, aimSpeed)
+    -- Get a target to aim at
+    local target = ChooseTarget(knifeData.aimTarget, knife.Position)
+    -- Remember the last taget that was chosen
+    knifeData.aimTarget = target
+    -- If no target was chosen, aim at the player
     target = target or player
-    local additionalDegrees = UTILS.Lerp(360, 0, time)
+    -- Make the knife spin when it first spawns
+    local additionalDegrees = UTILS.Lerp(360, 0, spinTime)
+    -- The degrees needed to aim at the target
     local degrees = ((target.Position + target.Velocity) - knife.Position):GetAngleDegrees() - 90
+    -- Add all degrees together and clamp it to [0, 360)
     degrees = (degrees + additionalDegrees) % 360
-    knifeData.q_hk_knife_prevRotation = UTILS.AngleLerp(knifeData.q_hk_knife_prevRotation, degrees, aimSpeed)
-    knife.SpriteRotation = knifeData.q_hk_knife_prevRotation
+    -- Lerp the angle towards the correct degrees (SpriteRotation is set to -90 every frame, can't use that for lerping)
+    knifeData.prevRotation = UTILS.AngleLerp(knifeData.prevRotation, degrees, aimSpeed)
+    -- Set the rotation for the knife
+    knife.SpriteRotation = knifeData.prevRotation
 end
 
 ---Handles the knife's spawning animation
@@ -38,35 +53,47 @@ end
 ---@param player EntityPlayer
 ---@param knifeType KNIFE_TYPE
 local function HandleKnifeSpawnAnimation(knife, player, knifeType)
-    local effectControl = knife:GetData().q_hk_knife_effectControl.Entity
-    local effectControlData = effectControl:GetData()
-    local knifeData = knife:GetData()
+    -- The knife's data
+    local knifeData = GetData(knife)
+    -- The effect that controls the knife's position
+    local effectControl = knifeData.effectControl.Entity
+    -- The data for the effect
+    local effectControlData = GetData(effectControl)
 
+    -- The frame amount that the spawning animation lasts
     local spawnTime = KNIFE.SPAWN_TIME[knifeType]
+    -- The frame amount before the knife fires
     local aimTime = KNIFE.SPAWN_TIME[knifeType] + KNIFE.AIM_TIME[knifeType]
 
-    -- If the laser is set to follow the player, adjust the effect's velocity accordingly
+    -- If the knife is set to follow the player, adjust the effect's velocity accordingly
     if KNIFE.FOLLOW_PLAYER and effectControl.FrameCount < aimTime then
-        local realPos = player.Position + effectControlData.q_hk_knife_effectOffset
+        local realPos = player.Position + effectControlData.effectOffset
         effectControl.Velocity = (realPos - effectControl.Position) * KNIFE.FOLLOW_SPEED
     end
+    -- Spawning animation, increase alpha and spin the knife
     if effectControl.FrameCount <= spawnTime then
         UTILS.ChangeSpriteAlpha(knife:GetSprite(), UTILS.Lerp(0, 1, effectControl.FrameCount / spawnTime))
-        knife.SpriteScale = UTILS.LerpV(Vector.Zero, knifeData.q_hk_knife_targetScale, effectControl.FrameCount / spawnTime)
+        knife.SpriteScale = UTILS.LerpV(Vector.Zero, knifeData.targetScale, effectControl.FrameCount / spawnTime)
     end
-    -- If it is time for the laser to fire, call the handler
+    -- Aim the knife at a target
     if effectControl.FrameCount < aimTime then
         AimKnife(knife, knifeData, player, effectControl.FrameCount / spawnTime, 1.0 / 10.0)
     end
+    -- Fire the knife at the target
     if effectControl.FrameCount >= aimTime then
+        -- If the knife is homing, constantly adjust the angle
         if knife:HasTearFlags(TearFlags.TEAR_HOMING) then
             AimKnife(knife, knifeData, player, 1, 1.0 / 60.0)
         end
-        effectControl.Velocity = Vector.FromAngle(knife:GetData().q_hk_knife_prevRotation + 90) * KNIFE.LAUNCH_SPEED
+        -- Move the effect controller towards the knife's aiming direction
+        effectControl.Velocity = Vector.FromAngle(knifeData.prevRotation + 90) * KNIFE.LAUNCH_SPEED
         if knifeType == KNIFE.TYPE.MOM then
-            knife.SpriteRotation = knife:GetData().q_hk_knife_prevRotation
+            -- Lock the knife's rotation
+            knife.SpriteRotation = knifeData.prevRotation
         else
+            -- Make clubs and scythes actually do damage
             knife:Shoot(0, 50)
+            -- Handle the spinning animations for the club and scythe
             knife:GetSprite():SetFrame("Spin", (knife.FrameCount) % 8)
         end
     end
@@ -88,7 +115,8 @@ local function SpawnKnife(knife, player, knifeType, position)
     effectControl.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
     effectControl.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
     -- For use if knife follows the player, sets original offset
-    effectControl:GetData().q_hk_knife_effectOffset = effectControl.Position - player.Position
+    local effectControlData = GetData(effectControl)
+    effectControlData.effectOffset = effectControl.Position - player.Position
     -- Spawn a knife
     local spawned = Isaac.Spawn(knife.Type, knife.Variant, 0, position, Vector.Zero, player)
     -- Set the parent of the knife to the effect
@@ -106,9 +134,10 @@ local function SpawnKnife(knife, player, knifeType, position)
         spawned.CollisionDamage = knife.CollisionDamage * KNIFE.DAMAGE
     end
     -- Remember the effect controller
-    spawned:GetData().q_hk_knife_effectControl = EntityRef(effectControl)
-    spawned:GetData().q_hk_knife_prevRotation = 270
-    spawned:GetData().q_hk_knife_targetScale = knife.SpriteScale * KNIFE.WEAPON_SCALE[knifeType]
+    local spawnedData = GetData(spawned)
+    spawnedData.effectControl = EntityRef(effectControl)
+    spawnedData.prevRotation = 270
+    spawnedData.targetScale = knife.SpriteScale * KNIFE.WEAPON_SCALE[knifeType]
     -- Set the scale of the knife
     spawned.SpriteScale = Vector.Zero
     local hash = spawned.Index

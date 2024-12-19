@@ -7,6 +7,8 @@ local UTILS = Quantum.UTILS
 ---@type QUEUE
 local QUEUE = Quantum.QUEUE
 
+local GetData = UTILS.FuncGetData("q_ab")
+
 -- ID of the item
 AB.ID = Isaac.GetItemIdByName("Artifical Bloom")
 
@@ -105,8 +107,8 @@ function AB:OnUseItem(id, RNG, player, Flags, Slot, CustomVarData)
             -- Charm the enemy
             randomEnemy:AddCharmed(EntityRef(player), -1)
             -- Mark the enemy as charmed by the mod
-            local enemyData = randomEnemy:GetData()
-            enemyData.q_ab_isCharmedEnemy = true
+            local enemyData = GetData(randomEnemy)
+            enemyData.isCharmedEnemy = true
         end
     end, QUEUE.UpdateType.Update)
 

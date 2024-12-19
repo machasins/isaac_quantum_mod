@@ -5,6 +5,8 @@ local game = Game()
 ---@type UTILS
 local UTILS = Quantum.UTILS
 
+local GetData = UTILS.FuncGetData("q_ff")
+
 FF.ID = Isaac.GetItemIdByName("Forgotten Friend")
 
 -- Random number to signify that this is a unique cultist
@@ -46,9 +48,9 @@ local function SetCultistFlags(cultist)
     -- Set the scale of the cultist
     cultist:ToNPC().Scale = FF.SCALE
     -- Initialize targeting data
-    local data = cultist:GetData()
-    data.q_rechargeTime = 0
-    data.q_isSpawning = false
+    local data = GetData(cultist)
+    data.rechargeTime = 0
+    data.isSpawning = false
 end
 
 ---Handle spawning the cultist initially
@@ -76,7 +78,7 @@ local function SpawnCultist(player)
         table.insert(save.ff_playerToSacrificer[player.Index .. ""], cultist.Index)
         -- Set the cultists flags
         SetCultistFlags(cultist)
-        cultist:GetData().q_index = #save.ff_playerToSacrificer[player.Index .. ""]
+        GetData(cultist).index = #save.ff_playerToSacrificer[player.Index .. ""]
     end
 end
 
@@ -88,7 +90,7 @@ local function HandleCultistBehavior(entity)
     if save then
         entity:GetSprite().Color = FF.NORMAL_COLOR
         -- The cultist's tracking data
-        local data = entity:GetData()
+        local data = GetData(entity)
         -- The current room of the floor
         local currentRoom = game:GetLevel():GetCurrentRoom()
         -- The cultist's owner
@@ -99,29 +101,29 @@ local function HandleCultistBehavior(entity)
         local sprite = entity:GetSprite()
 
         -- Check if the cultist is spawning claws but the respawn animation is finished
-        if data.q_isSpawning and sprite and sprite:GetAnimation() ~= "Respawn" then
+        if data.isSpawning and sprite and sprite:GetAnimation() ~= "Respawn" then
             -- Reset the cooldown
-            data.q_rechargeTime = entity.FrameCount + (math.max(FF.CLAW_RECHARGE - (collectibleNum - 1), FF.MIN_CLAW_RECHARGE)) * 30 + math.random(0, FF.CLAW_RECHARGE_VARIANCE * 30)
+            data.rechargeTime = entity.FrameCount + (math.max(FF.CLAW_RECHARGE - (collectibleNum - 1), FF.MIN_CLAW_RECHARGE)) * 30 + math.random(0, FF.CLAW_RECHARGE_VARIANCE * 30)
             -- The cultist is no longer spawning claws
-            data.q_isSpawning = false
+            data.isSpawning = false
         -- Check if the amount of charmed enemies in the room reached the cap
         -- OR if the amount of times the cultist has revived in the room has reached the cap
         -- OR the room is clear and no actions are currently being taken
-        elseif not currentRoom:IsClear() and entity.FrameCount >= data.q_rechargeTime then
+        elseif not currentRoom:IsClear() and entity.FrameCount >= data.rechargeTime then
             -- Start the cultists summoning claws
             entity:GetSprite():Play("Respawn", true)
             entity.State = 13
             -- Keep track that the cultist is spawning claws
-            data.q_isSpawning = true
+            data.isSpawning = true
             -- Stop the cultist from starting to spawn any more claws in this period
-            data.q_rechargeTime = math.maxinteger
+            data.rechargeTime = math.maxinteger
             -- Stop the cultist from moving erradically
             entity.TargetPosition = entity.Position
         end
         -- Only set the target position if the cultist is not spawning claws (pathfinding is not run during the animation)
-        if not data.q_isSpawning then
+        if not data.isSpawning then
             -- The rotation offset for other cultists
-            local offset = data.q_index * (360 / #save.ff_playerToSacrificer[player.Index .. ""])
+            local offset = data.index * (360 / #save.ff_playerToSacrificer[player.Index .. ""])
             -- Set the cultist's target position to circle around the player
             entity.TargetPosition = player.Position + Vector(1,0):Rotated((player.FrameCount * 0.75) % 360 + offset) * 50
         end
@@ -140,14 +142,14 @@ end
 ---@param entity EntityNPC
 local function HandleClawBehavior(entity)
     -- The cultist's tracking data
-    local data = entity:GetData()
-    data.q_setData = data.q_setData or false
-    if not data.q_setData then
+    local data = GetData(entity)
+    data.setData = data.setData or false
+    if not data.setData then
         -- Set random offset
         entity.PositionOffset = Vector(math.random(-FF.CLAW_OFFSET,FF.CLAW_OFFSET), math.random(-FF.CLAW_OFFSET, FF.CLAW_OFFSET))
         -- Set scale
         entity.Scale = FF.CLAW_SCALE
-        data.q_setData = true
+        data.setData = true
     end
 end
 
@@ -214,10 +216,10 @@ function FF:OnNewRoom()
     -- Loop through the cultists
     for _, e in pairs(entities) do
         -- The tracking data for the cultist
-        local data = e:GetData()
+        local data = GetData(e)
         -- Reset all data
-        data.q_rechargeTime = e.FrameCount + math.random(3 * 30) + 30
-        data.q_isSpawning = false
+        data.rechargeTime = e.FrameCount + math.random(3 * 30) + 30
+        data.isSpawning = false
     end
 end
 

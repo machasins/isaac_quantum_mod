@@ -7,6 +7,7 @@ HK.UTILS = include("quantum.utils")
 HK.ID = Isaac.GetItemIdByName("Hydrokinesis")
 
 HK.Luck = {}
+---@class LUCK
 local LUCK = HK.Luck
 
 -- Base chance for a tear to spawn

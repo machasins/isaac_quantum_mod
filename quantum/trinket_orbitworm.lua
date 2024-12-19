@@ -3,7 +3,9 @@ local OW = Quantum.OrbitWorm
 local game = Game()
 
 ---@class UTILS
-local utils = include("quantum.utils")
+local UTILS = Quantum.UTILS
+
+local GetData = UTILS.FuncGetData("q_ow")
 
 -- ID of the item
 OW.ID = Isaac.GetTrinketIdByName("Orbit Worm")
@@ -28,12 +30,12 @@ function OW:OnTearUpdate(tear)
     -- Make sure the player exists and the player has the trinket
     if not (player and player:GetTrinketMultiplier(OW.ID) > 0) then return end
     -- Get custom data for the tear
-    local data = tear:GetData()
+    local data = GetData(tear)
     -- Check if this tear is an orbiting tear
-    if data.q_ow_orbitTear ~= nil then
+    if data.orbitTear ~= nil then
         -- The tear entity this tear is orbiting
         ---@type EntityTear
-        local orbitTear = data.q_ow_orbitTear.Entity:ToTear()
+        local orbitTear = data.orbitTear.Entity:ToTear()
         -- Check if the orbit tear has fallen
         if not orbitTear:IsDead() then
             -- Copy the orbit tear's height variables
@@ -41,9 +43,9 @@ function OW:OnTearUpdate(tear)
             tear.FallingSpeed = orbitTear.FallingSpeed
             tear.Height = orbitTear.Height
             -- The term going into sin / cos
-            local spin = (tear.FrameCount / 30.0) * data.q_ow_orbitSpeed * 2.0 * math.pi + data.q_ow_orbitOffset
+            local spin = (tear.FrameCount / 30.0) * data.orbitSpeed * 2.0 * math.pi + data.orbitOffset
             -- The derivative of the term inside of sin / cos
-            local dspin = data.q_ow_orbitSpeed * 2.0 * math.pi
+            local dspin = data.orbitSpeed * 2.0 * math.pi
             -- Only run this on frame 1
             if tear.FrameCount == 1 then
                 -- Set the position of the tear to the correct inital position
@@ -56,11 +58,11 @@ function OW:OnTearUpdate(tear)
             tear.Velocity = tear.Velocity:Normalized() * player.ShotSpeed * 10
         end
         -- Lerp the scale towards the beginning of the tears life
-        tear.Scale = utils.Lerp(0, data.q_ow_targetScale, tear.FrameCount / OW.GROW_FRAME_MAX)
+        tear.Scale = UTILS.Lerp(0, data.targetScale, tear.FrameCount / OW.GROW_FRAME_MAX)
     -- Check whether this tear can spawn additional orbiting tears
-    elseif not data.q_ow_hasSpawnedOrbitTear and tear.FrameCount <= OW.FRAME_CUTOFF then
+    elseif not data.hasSpawnedOrbitTear and tear.FrameCount <= OW.FRAME_CUTOFF then
         -- Set that this tear has spawned other tears
-        data.q_ow_hasSpawnedOrbitTear = true
+        data.hasSpawnedOrbitTear = true
         -- The trinket multiplier for the player
         local mult = player:GetTrinketMultiplier(OW.ID)
         -- How fast the tear should orbit this tear, based on shot speed with a random direction
@@ -83,15 +85,15 @@ function OW:OnTearUpdate(tear)
             -- Stop the tear from homing as much
             spawned_tear.HomingFriction = 1
             -- The data for the spawned tear
-            local spawned_data = spawned_tear:GetData()
+            local spawned_data = GetData(spawned_tear)
             -- Set the tear entity the spawned tear should orbit
-            spawned_data.q_ow_orbitTear = EntityRef(tear)
+            spawned_data.orbitTear = EntityRef(tear)
             -- Set the speed of the orbiting tear
-            spawned_data.q_ow_orbitSpeed = rand_speed
+            spawned_data.orbitSpeed = rand_speed
             -- Set the random offset for the spawned tear, with an additional offset based on the amount of tears already spawned
-            spawned_data.q_ow_orbitOffset = rand_offset + i * (2.0 * math.pi) / mult
+            spawned_data.orbitOffset = rand_offset + i * (2.0 * math.pi) / mult
             -- Set the target scale for the spawned tear
-            spawned_data.q_ow_targetScale = OW.SCALE_MULTIPLIER * tear.Scale
+            spawned_data.targetScale = OW.SCALE_MULTIPLIER * tear.Scale
         end
     end
 end

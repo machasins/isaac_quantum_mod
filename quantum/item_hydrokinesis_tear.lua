@@ -2,6 +2,7 @@ local HK = Quantum.Hydrokinesis
 
 ---@class UTILS
 local UTILS = HK.UTILS
+---@class LUCK
 local LUCK = HK.Luck
 
 local TEAR = HK.Tear
@@ -10,23 +11,26 @@ TEAR.spawned = {}
 
 local game = Game()
 
+local GetData = UTILS.FuncGetData("q_hk_tear")
+
 ---Retrieve data from the intial tear to apply to the spawned tear
 ---@param tear EntityTear The inital tear
 ---@param hash number The hash of the spawned tear
 ---@param player EntityPlayer 
 local function RetrieveSpawnedTearData(tear, hash, player)
     -- Initalize data
-    TEAR.spawned[hash] = {}
+    TEAR.spawned[hash] = true
+    local tearData = GetData(tear)
     -- Set the target tear scale
-    TEAR.spawned[hash].originalScale = tear.BaseScale * TEAR.SCALE
+    tearData.originalScale = tear.BaseScale * TEAR.SCALE
     -- Keep track of the original falling acceleration
-    TEAR.spawned[hash].originalFallingAcceleration = tear.FallingAcceleration
+    tearData.originalFallingAcceleration = tear.FallingAcceleration
     -- Keep track of the position offset from the player
-    TEAR.spawned[hash].offsetPosition = tear.Position - tear.SpawnerEntity.Position
+    tearData.offsetPosition = tear.Position - player.Position
     -- Keep track of the original tear height
-    TEAR.spawned[hash].originalHeight = tear.Height
+    tearData.originalHeight = tear.Height
     -- Keep track of the original tear alpha
-    TEAR.spawned[hash].originalAlpha = tear:GetSprite().Color.A
+    tearData.originalAlpha = tear:GetSprite().Color.A
     local flagsToRemove = BitSet128(0,0)
     -- Get all flags that should be removed from the tear
     for _, f in pairs(TEAR.FLAG_REMOVE_LIST) do
@@ -44,7 +48,7 @@ local function RetrieveSpawnedTearData(tear, hash, player)
     -- Clear the flags that the tear should not have
     tear:ClearTearFlags(flagsToRemove | flagsToReAdd)
     -- Keep track of the flags that should be readded
-    TEAR.spawned[hash].originalTearFlags = flagsToReAdd
+    tearData.originalTearFlags = flagsToReAdd
 end
 
 ---Handles spawning a new tear
@@ -124,11 +128,10 @@ end
 
 ---Update any spawned tears
 ---@param tear any
----@param hash any
 ---@param player any
-local function HandleSpawnedTear(tear, hash, player)
+local function HandleSpawnedTear(tear, player)
     -- The tear data that is being tracked
-    local tearData = TEAR.spawned[hash]
+    local tearData = GetData(tear)
     -- Handle spawning animation
     if tear.FrameCount <= TEAR.SPAWN_TIME then
         HandleSpawnAnimation(tear, tearData)
@@ -174,7 +177,7 @@ function HK:OnTearCreate(tear)
     -- Check if the tear was spawned by another tear
     if TEAR.spawned[hash] ~= nil then
         -- Handle the spawned tear (animations, firing)
-        HandleSpawnedTear(tear, hash, player)
+        HandleSpawnedTear(tear, player)
         -- Do not run further code
         return
     end
@@ -239,7 +242,7 @@ function HK:OnTearRemove(ent)
     -- The hash of the entity
     local hash = ent.Index
     -- Remove from the normal list, if available
-    if TEAR.normal[hash] then
+    if TEAR.normal[hash] ~= nil then
         TEAR.normal[hash] = nil
     end
     -- Remove from the spawned list, if available

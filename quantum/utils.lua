@@ -287,5 +287,16 @@ function utils.ChangeSpriteAlpha(sprite, alpha)
     sprite.Color = Color(sprite.Color.R, sprite.Color.G, sprite.Color.B, alpha, sprite.Color.RO, sprite.Color.GO, sprite.Color.BO)
 end
 
+---Get a unique table for entity data
+---@param name string
+---@return function
+function utils.FuncGetData(name)
+    return function (e)
+        local data = e:GetData()
+        data[name] = data[name] or {}
+        return data[name]
+    end
+end
+
 ---@return UTILS
 return utils
