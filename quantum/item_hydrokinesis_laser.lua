@@ -16,7 +16,7 @@ local game = Game()
 ---@param hash number The hash value for the effect
 ---@param laser EntityLaser The laser that triggered the effect
 ---@param colorLaser EntityLaser The laser that generates color information
----@param laserType TYPE The type of the laser
+---@param laserType LASER_TYPE The type of the laser
 ---@param player EntityPlayer The player that spawned the effect
 local function RetrieveSpawnedEffectData(effect, hash, laser, colorLaser, laserType, player)
     -- Initialize data
@@ -48,7 +48,7 @@ end
 ---@param colorLaser EntityLaser The laser spawned for color data
 ---@param hash number The hash of the laser
 ---@param laser EntityLaser The inital laser
----@param laserType TYPE The type of the laser
+---@param laserType LASER_TYPE The type of the laser
 ---@param player EntityPlayer The player
 local function RetrieveSpawnedLaserData(colorLaser, hash, laser, laserType, player)
     -- Initalize data
@@ -65,7 +65,7 @@ local function RetrieveSpawnedLaserData(colorLaser, hash, laser, laserType, play
     end
     -- Set the inital color of the laser
     colorLaser:GetSprite().Color = laser:GetSprite().Color
-    colorLaser:GetSprite().Color.A = 1.0
+    UTILS.ChangeSpriteAlpha(colorLaser:GetSprite(), 1.0)
     -- Disable the laser from being viewed
     colorLaser.Visible = false
 end
@@ -79,14 +79,14 @@ local function SetEffectColor(effect)
     effect:GetSprite().Color = effectData.colorLaser:GetSprite().Color
     -- Control intial spawn alpha
     if effect.FrameCount <= LASER.TIME[effectData.laserType].SPAWN then
-        effect:GetSprite().Color.A = UTILS.Lerp(0, 1, effect.FrameCount / LASER.TIME[effectData.laserType].SPAWN * 2)
+        UTILS.ChangeSpriteAlpha(effect:GetSprite(), UTILS.Lerp(0, 1, effect.FrameCount / LASER.TIME[effectData.laserType].SPAWN * 2))
     end
 end
 
 ---In charge of spawning the effect before the laser
 ---@param laser EntityLaser The inital laser
 ---@param player EntityPlayer The player
----@param laserType TYPE The type of the laser
+---@param laserType LASER_TYPE The type of the laser
 ---@param position Vector The position to spawn the effect
 local function SpawnLaserEffect(laser, player, laserType, position)
     -- Spawn a laser that keeps track of the color the laser should be

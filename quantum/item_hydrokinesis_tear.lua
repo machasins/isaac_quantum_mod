@@ -7,7 +7,6 @@ local LUCK = HK.Luck
 local TEAR = HK.Tear
 TEAR.normal = {}
 TEAR.spawned = {}
-TEAR.isSpawning = false
 
 local game = Game()
 
@@ -61,11 +60,15 @@ local function SpawnTear(tear, player, position)
         -- The player's tear data
         local playerTearData = player:GetTearHitParams(tear.Variant == TearVariant.FETUS and WeaponType.WEAPON_FETUS or WeaponType.WEAPON_TEARS)
         -- Set relevant data on new tear
+        newTear:ChangeVariant(tear.Variant)
         newTear.Parent = player
         newTear.Height = playerTearData.TearHeight
         newTear.Scale = playerTearData.TearScale
         newTear.CollisionDamage = tear.CollisionDamage * TEAR.DAMAGE
-        newTear.TearFlags = tear.TearFlags
+        newTear.TearFlags = playerTearData.TearFlags | tear.TearFlags
+        newTear.Friction = tear.Friction
+        newTear.HomingFriction = tear.HomingFriction
+        newTear.Color = playerTearData.TearColor
         -- Save relevant data
         RetrieveSpawnedTearData(newTear, hash, player)
         -- Make sure tear can go through obstacles
@@ -73,7 +76,7 @@ local function SpawnTear(tear, player, position)
         -- Initalize the tear's spawning animation
         newTear.FallingAcceleration = 0
         newTear.Scale = 0
-        newTear:GetSprite().Color.A = 0
+        UTILS.ChangeSpriteAlpha(newTear:GetSprite(), 0)
         newTear.Height = TEAR.INITIAL_HEIGHT
         newTear.Velocity = Vector(0,0.000001)
     end
@@ -86,11 +89,12 @@ local function HandleSpawnAnimation(tear, tearData)
     -- Lerp the scale of the tear
     tear.Scale = UTILS.Lerp(0, tearData.originalScale, tear.FrameCount / TEAR.SPAWN_TIME)
     -- Lerp the alpha of the tear
-    tear:GetSprite().Color.A = UTILS.Lerp(0, tearData.originalAlpha, tear.FrameCount / TEAR.SPAWN_TIME * 1.5)
+    UTILS.ChangeSpriteAlpha(tear:GetSprite(), UTILS.Lerp(0, tearData.originalAlpha, tear.FrameCount / TEAR.SPAWN_TIME * 1.5))
     -- Make sure the tear doesn't fall
     tear.FallingAcceleration = -0.1
+    tear.FallingSpeed = 0
     -- Lerp the movement of the tear, going upwards
-    tear.FallingSpeed = (UTILS.Lerp(TEAR.INITIAL_HEIGHT, tearData.originalHeight, (tear.FrameCount + 1) / (TEAR.SPAWN_TIME - 1)) - tear.Height) / 2
+    tear.Height = UTILS.Lerp(TEAR.INITIAL_HEIGHT, tearData.originalHeight, (tear.FrameCount + 1) / (TEAR.SPAWN_TIME - 1))
 end
 
 ---Fire the tear at the nearest enemy
@@ -123,20 +127,6 @@ end
 ---@param hash any
 ---@param player any
 local function HandleSpawnedTear(tear, hash, player)
-    -- Check for any child tears
-    if tear.Variant == TearVariant.FETUS and TEAR.spawned[hash].child == nil then
-        local knifes = Isaac.FindByType(EntityType.ENTITY_KNIFE)
-        -- Loop through all knifes
-        for _,k in pairs(knifes) do
-            -- If the parent is the same, keep track of it
-            if GetPtrHash(k.Parent) == GetPtrHash(tear) then
-                TEAR.spawned[hash].child = k:ToKnife()
-            end
-        end
-        -- Set the child to an empty array if no child was found
-        TEAR.spawned[hash].child = TEAR.spawned[hash].child or {}
-    end
-
     -- The tear data that is being tracked
     local tearData = TEAR.spawned[hash]
     -- Handle spawning animation
@@ -182,7 +172,7 @@ function HK:OnTearCreate(tear)
     if not (player and player:HasCollectible(HK.ID)) then return end
 
     -- Check if the tear was spawned by another tear
-    if TEAR.isSpawning or TEAR.spawned[hash] ~= nil then
+    if TEAR.spawned[hash] ~= nil then
         -- Handle the spawned tear (animations, firing)
         HandleSpawnedTear(tear, hash, player)
         -- Do not run further code

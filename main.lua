@@ -1,5 +1,6 @@
 Quantum = RegisterMod("Quantum Pack", 1)
 
+---@type SaveManager
 Quantum.save = include("save_manager")
 Quantum.save.Init(Quantum)
 
@@ -18,5 +19,9 @@ include("quantum.item_coincollection")
 include("quantum.item_wormbucket")
 include("quantum.item_artificalbloom")
 include("quantum.item_roomhack")
+include("quantum.item_singularity")
+include("quantum.item_dicedmeat")
+include("quantum.item_jestersdeck")
 include("quantum.trinket_orbitworm")
 include("quantum.trinket_trailworm")
+include("quantum.trinket_clumpedpenny")

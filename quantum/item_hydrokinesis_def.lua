@@ -69,19 +69,19 @@ TEAR.FLAG_MATCH_LIST = {
 ---@field SPAWN_MAX_DISTANCE number The max distance the laser should spawn away from the player, if the laser follows the player
 ---@field SPAWN_MIN_DISTANCE number The min distance the laser should spawn away from the player, if the laser follows the player
 ---@field TYPE table The types of laser, generalized
----@field VAR_TO_TYPE table<LaserVariant, TYPE> Convert the variant of laser into the generalized type
----@field SUB_TO_TYPE table<LaserSubType, TYPE> Convert the subtype of laser into the generalized type (Checks if Tech X)
----@field TYPE_TO_WEAPON table<TYPE, WeaponType> Convert the generalized type into a weaponType used by the player
----@field TIME table<TYPE, { SPAWN: integer, FIRE: integer }> The spawn and fire times for each type of laser
+---@field VAR_TO_TYPE table<LaserVariant, LASER_TYPE> Convert the variant of laser into the generalized type
+---@field SUB_TO_TYPE table<LaserSubType, LASER_TYPE> Convert the subtype of laser into the generalized type (Checks if Tech X)
+---@field TYPE_TO_WEAPON table<LASER_TYPE, WeaponType> Convert the generalized type into a weaponType used by the player
+---@field TIME table<LASER_TYPE, { SPAWN: integer, FIRE: integer }> The spawn and fire times for each type of laser
 ---@field FLAG_REMOVE_LIST TearFlags[] Flags to remove before the laser is spawned
 ---@field FLAG_MATCH_LIST TearFlags[] Flags that should match the player's flags to spawn another laser
----@field TO_EFFECT table<TYPE, EffectVariant> Convert the generalized type into what effect it should spawn
+---@field TO_EFFECT table<LASER_TYPE, EffectVariant> Convert the generalized type into what effect it should spawn
 ---@field EFFECT_LIST table<EffectVariant, boolean> List of effects that are handled by this script
 ---@field HANDLE_LIST table<LaserVariant, boolean> List of lasers that are handled by this script
----@field WEAPON_EFFECT_ADD_LENGTH table<TYPE, number> How much time to add to the effect's lifetime, based on laser type
----@field WEAPON_EFFECT_SCALE table<TYPE, number> Percentage of the scale that the effect should have, based on laser type
----@field WEAPON_SCALE table<TYPE, number>  Percentage of the scale that the laser should have, based on laser type
----@field WEAPON_DURATION table<TYPE, number>  How long the laser should last, based on laser type
+---@field WEAPON_EFFECT_ADD_LENGTH table<LASER_TYPE, number> How much time to add to the effect's lifetime, based on laser type
+---@field WEAPON_EFFECT_SCALE table<LASER_TYPE, number> Percentage of the scale that the effect should have, based on laser type
+---@field WEAPON_SCALE table<LASER_TYPE, number>  Percentage of the scale that the laser should have, based on laser type
+---@field WEAPON_DURATION table<LASER_TYPE, number>  How long the laser should last, based on laser type
 Quantum.Hydrokinesis.Laser = {}
 local LASER = Quantum.Hydrokinesis.Laser
 
@@ -92,7 +92,7 @@ LASER.FOLLOW_SPEED = 0.75
 LASER.SPAWN_MAX_DISTANCE = 60
 LASER.SPAWN_MIN_DISTANCE = 30
 
----@enum TYPE
+---@enum LASER_TYPE
 LASER.TYPE = {
     TECH = 1,
     BRIMSTONE = 2,
@@ -201,6 +201,132 @@ LASER.WEAPON_DURATION = {
     [LASER.TYPE.TECHX] = 0,
     [LASER.TYPE.BRIMSTONE] = 15,
     [LASER.TYPE.TECH] = 5,
+}
+
+--#endregion
+
+--#region KNIFE
+
+KnifeVariant = KnifeVariant or {
+    MOMS_KNIFE = 0,
+    BONE_CLUB = 1,
+    BONE_SCYTHE = 2,
+    BERSERK_CLUB = 3,
+    BAG_OF_CRAFTING = 4,
+    SUMPTORIUM = 5,
+    NOTCHED_AXE = 9,
+    SPIRIT_SWORD = 10,
+    TECH_SWORD = 11,
+}
+
+KnifeSubType = KnifeSubType or {
+    PROJECTILE = 1,
+    CLUB_HITBOX = 4,
+}
+
+---@class KNIFE
+---@field normal table Keeps track of the normal knives that have been spawned
+---@field spawned table Keeps track of the knives that have been spawned by the script
+---@field DAMAGE number Percent of damage the knife deals
+---@field LAUNCH_SPEED number How fast the knife is launched towards targets
+---@field FOLLOW_PLAYER boolean If the knife should follow the player
+---@field FOLLOW_SPEED number The follow speed of the knife
+---@field SPAWN_MAX_DISTANCE number The max distance the knife should spawn away from the player, if the knife follows the player
+---@field SPAWN_MIN_DISTANCE number The min distance the knife should spawn away from the player, if the knife follows the player
+---@field TYPE table The types of knife, generalized
+---@field VAR_TO_TYPE table<KnifeVariant, KNIFE_TYPE> Convert the variant of knife into the generalized type
+---@field SUB_TO_TYPE table<KnifeSubType, KNIFE_TYPE> Convert the subtype of knife into the generalized type (Checks if Tech X)
+---@field TYPE_TO_WEAPON table<KNIFE_TYPE, WeaponType> Convert the generalized type into a weaponType used by the player
+---@field SPAWN_TIME table<KNIFE_TYPE, number> How long it takes for each knife to spawn
+---@field AIM_TIME table<KNIFE_TYPE, number> How long it takes for each knife to aim
+---@field FLAG_REMOVE_LIST TearFlags[] Flags to remove before the knife is spawned
+---@field FLAG_MATCH_LIST TearFlags[] Flags that should match the player's flags to spawn another knife
+---@field WEAPON_SCALE table<KNIFE_TYPE, number>  Percentage of the scale that the knife should have, based on knife type
+---@field WEAPON_DURATION table<KNIFE_TYPE, number>  How long the knife should last, based on knife type
+Quantum.Hydrokinesis.Knife = {}
+local KNIFE = Quantum.Hydrokinesis.Knife
+
+KNIFE.DAMAGE = 0.4
+KNIFE.LAUNCH_SPEED = 15
+
+KNIFE.FOLLOW_PLAYER = false
+KNIFE.FOLLOW_SPEED = 0.75
+KNIFE.SPAWN_MAX_DISTANCE = 60
+KNIFE.SPAWN_MIN_DISTANCE = 30
+
+---@enum KNIFE_TYPE
+KNIFE.TYPE = {
+    MOM = 1,
+    CLUB = 2,
+    SCYTHE = 3,
+    NOT_SUPPORTED = -1,
+}
+
+KNIFE.VAR_TO_TYPE = {
+    [KnifeVariant.MOMS_KNIFE] = KNIFE.TYPE.MOM,
+    [KnifeVariant.BONE_CLUB] = KNIFE.TYPE.CLUB,
+    [KnifeVariant.BONE_SCYTHE] = KNIFE.TYPE.SCYTHE,
+    [KnifeVariant.BERSERK_CLUB] = KNIFE.TYPE.NOT_SUPPORTED,
+    [KnifeVariant.BAG_OF_CRAFTING] = KNIFE.TYPE.NOT_SUPPORTED,
+    [KnifeVariant.SUMPTORIUM] = KNIFE.TYPE.NOT_SUPPORTED,
+    [KnifeVariant.NOTCHED_AXE] = KNIFE.TYPE.NOT_SUPPORTED,
+    [KnifeVariant.SPIRIT_SWORD] = KNIFE.TYPE.NOT_SUPPORTED,
+    [KnifeVariant.TECH_SWORD] = KNIFE.TYPE.NOT_SUPPORTED,
+}
+
+KNIFE.SUB_TO_TYPE = {
+    [KnifeSubType.PROJECTILE] = KNIFE.TYPE.MOM,
+    [KnifeSubType.CLUB_HITBOX] = KNIFE.TYPE.CLUB,
+}
+
+KNIFE.TYPE_TO_WEAPON = {
+    [KNIFE.TYPE.MOM] = WeaponType.WEAPON_KNIFE,
+    [KNIFE.TYPE.CLUB] = WeaponType.WEAPON_BONE,
+    [KNIFE.TYPE.SCYTHE] = WeaponType.WEAPON_BONE,
+}
+
+KNIFE.SPAWN_TIME = {
+    [KNIFE.TYPE.MOM] = 30,
+    [KNIFE.TYPE.CLUB] = 30,
+    [KNIFE.TYPE.SCYTHE] = 30,
+}
+
+KNIFE.AIM_TIME = {
+    [KNIFE.TYPE.MOM] = 30,
+    [KNIFE.TYPE.CLUB] = 30,
+    [KNIFE.TYPE.SCYTHE] = 30,
+}
+
+KNIFE.FLAG_REMOVE_LIST = {
+    TearFlags.TEAR_LASERSHOT,
+    TearFlags.TEAR_ORBIT,
+    TearFlags.TEAR_ORBIT_ADVANCED,
+    TearFlags.TEAR_TRACTOR_BEAM,
+    TearFlags.TEAR_WAIT,
+    TearFlags.TEAR_OCCULT,
+}
+
+KNIFE.FLAG_MATCH_LIST = {
+    TearFlags.TEAR_SPLIT,
+    TearFlags.TEAR_QUADSPLIT,
+    TearFlags.TEAR_BOUNCE,
+    TearFlags.TEAR_CONTINUUM,
+    TearFlags.TEAR_BONE,
+    TearFlags.TEAR_ABSORB,
+    TearFlags.TEAR_BOUNCE_WALLSONLY,
+    TearFlags.TEAR_FETUS_KNIFE,
+}
+
+KNIFE.WEAPON_SCALE = {
+    [KNIFE.TYPE.MOM] = 0.75,
+    [KNIFE.TYPE.CLUB] = 0.75,
+    [KNIFE.TYPE.SCYTHE] = 0.75,
+}
+
+KNIFE.WEAPON_DURATION = {
+    [KNIFE.TYPE.MOM] = 120,
+    [KNIFE.TYPE.CLUB] = 120,
+    [KNIFE.TYPE.SCYTHE] = 120,
 }
 
 --#endregion

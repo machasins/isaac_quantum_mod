@@ -22,6 +22,16 @@ function utils.Lerp(a, b, t)
     return a + (b - a) * math.min(math.max(t, 0.0), 1.0)
 end
 
+---Interpolate between two angles based on time (Clamped between 0 and 1)
+---@param a number Start
+---@param b number End
+---@param t number Time
+---@return number
+function utils.AngleLerp(a, b, t)
+    local diff = (((b - a) + 180) % 360) - 180
+    return (a + diff * math.min(math.max(t, 0.0), 1.0)) % 360
+end
+
 ---Interpolate between two vectors based on time
 ---@param a Vector Start
 ---@param b Vector End
@@ -99,6 +109,24 @@ function utils.AnyPlayerHasCollectible(id)
 
     -- No one had the collectible, return false
     return false
+end
+
+---Run a callback for every player that has a collectible
+---@param id CollectibleType The collectible to check for
+---@param func function(EntityPlayer) The function to run
+function utils.ForEveryPlayerHasCollectible(id, func)
+    -- The amount of players in the game
+    local playerNum = Game():GetNumPlayers()
+    -- Loop through every player
+    for i = 0, playerNum - 1 do
+        -- The player to check
+        local player = Isaac.GetPlayer(i)
+        -- Check if the player has the collectible
+        if player:HasCollectible(id) then
+            -- Run the function
+            func(player)
+        end
+    end
 end
 
 ---Get the first player that has the collectible
@@ -250,6 +278,13 @@ function utils.GetEntityWithIndex(entities, index)
     end
     -- Entity not found
     return nil
+end
+
+---Change the sprite's alpha
+---@param sprite Sprite
+---@param alpha number
+function utils.ChangeSpriteAlpha(sprite, alpha)
+    sprite.Color = Color(sprite.Color.R, sprite.Color.G, sprite.Color.B, alpha, sprite.Color.RO, sprite.Color.GO, sprite.Color.BO)
 end
 
 ---@return UTILS

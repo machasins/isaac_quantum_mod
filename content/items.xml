@@ -75,4 +75,28 @@
         description="Ssslither"
         gfx="trinket_orbit_worm.png"
         />
+    <!-- murphy 835577836059361350 -->
+    <passive id="13" name="Unstable Singularity"
+        description="Prone to explosion"
+        gfx="item_clydepills.png"
+        quality="3" 
+        />
+    <passive id="14" name="Jester's Deck"
+        description="Chaos, Chaos!"
+        gfx="item_clydepills.png"
+        quality="2" 
+        />
+    <!-- magargo 1114358518884073544 -->
+    <active id="15" name="Diced Meat"
+        description="Spicy!"
+        gfx="item_clydepills.png"
+        quality="4" 
+        chargetype="normal" 
+        maxcharges="0" 
+        />
+    <!-- foiled again 700138214106726470 -->
+    <trinket  id="3" name="Clumped Penny"
+        description="Wealth of Illness"
+        gfx="trinket_orbit_worm.png"
+        />
 </items>

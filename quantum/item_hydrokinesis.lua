@@ -59,6 +59,7 @@ HK.hasSpawned = false
 include("quantum.item_hydrokinesis_def")
 include("quantum.item_hydrokinesis_tear")
 include("quantum.item_hydrokinesis_laser")
+include("quantum.item_hydrokinesis_knife")
 
 ---Runs every update frame
 function HK:OnUpdate()
