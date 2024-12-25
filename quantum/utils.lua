@@ -298,5 +298,19 @@ function utils.FuncGetData(name)
     end
 end
 
+---Convert fire delay into TPS
+---@param maxFireDelay number
+---@return number
+function utils.toTearsPerSecond(maxFireDelay)
+    return 30 / (maxFireDelay + 1)
+end
+
+---Convert TPS into fire delay
+---@param tearsPerSecond number
+---@return number
+function utils.toMaxFireDelay(tearsPerSecond)
+    return (30 / tearsPerSecond) - 1
+end
+
 ---@return UTILS
 return utils

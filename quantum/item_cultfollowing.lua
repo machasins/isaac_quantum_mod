@@ -209,7 +209,7 @@ local function HandleCultistBehavior(entity)
                 data.isReviving = true
             end
             -- Check if the revive timeout has been triggered
-            if Isaac.GetFrameCount() > data.q_cf_reviveTimeout then
+            if Isaac.GetFrameCount() > data.reviveTimeout then
                 -- Reset the target for the cultist
                 data.target = nil
                 -- Mark that the cultist is no longer targeting an enemy
@@ -281,12 +281,12 @@ end
 function CF:OnPlayerUpdate(player)
     -- Mod run save data
     local save = Quantum.save.GetRunSave()
-    if save and player:HasCollectible(CF.ID) then
+    if save then
         -- Intialize save data
         save.cf_playerToCultist = save.cf_playerToCultist or {}
         save.cf_cultistToPlayer = save.cf_cultistToPlayer or {}
         save.cf_playerToCultist[player.Index .. ""] = save.cf_playerToCultist[player.Index .. ""] or {}
-        -- The count of cultists in the room
+        -- The count of cultists that the player owns
         local cultistCount = #save.cf_playerToCultist[player.Index .. ""]
         -- The amount of cultists there should be for this player
         local itemCount = player:GetCollectibleNum(CF.ID) * (player:HasCollectible(CollectibleType.COLLECTIBLE_BFFS) and 2 or 1)
@@ -296,7 +296,7 @@ function CF:OnPlayerUpdate(player)
             SpawnCultist(player)
         elseif itemCount < cultistCount then
             -- The index of the last cultist within the player owned cultist list
-            local lastCultist = #save.cf_playerToCultist[player.Index .. ""] - 1
+            local lastCultist = #save.cf_playerToCultist[player.Index .. ""]
             -- The index of the last cultist within the game
             local lastCultistIndex = save.cf_playerToCultist[player.Index .. ""][lastCultist]
             -- The last cultist assigned to the player
@@ -306,7 +306,7 @@ function CF:OnPlayerUpdate(player)
                 -- Remove the cultist from the game
                 cultist:Remove()
                 -- Mark the cultist as not owned by the player
-                save.cf_playerToCultist[player.Index .. ""][lastCultist] = nil
+                table.remove(save.cf_playerToCultist[player.Index .. ""], lastCultist)
                 -- Remove the cultist from the list
                 save.cf_cultistToPlayer[lastCultistIndex] = nil
             end

@@ -3,7 +3,7 @@ local CP = Quantum.ClumpedPenny
 local game = Game()
 
 ---@class UTILS
-local utils = include("quantum.utils")
+local UTILS = Quantum.UTILS
 
 BloodClotSubType = BloodClotSubType or {
     RED = 0,

@@ -1,12 +1,12 @@
 <items gfxroot="gfx/items/" deathanm2="gfx/death_items.anm2" version="1">
     <passive id="1" name="Butterfly's Effect"
         description="Slight changes magnify"
-        gfx="item_butterflys_effect.png"
+        gfx="item_butterflyseffect.png"
         quality="4" 
         />
     <passive id="2" name="Quantum Scissors"   
         description="Cut the bonds of the unseen" 
-        gfx="item_quantum_scissors.png"  
+        gfx="item_quantumscissors.png"  
         quality="3" 
         />
     <passive id="3" name="Hydrokinesis"       
@@ -21,69 +21,69 @@
         />
     <passive id="5" name="Cult Following"     
         description="Glory to the crying king"    
-        gfx="item_clydepills.png"        
+        gfx="item_cultfollowing.png"        
         quality="4" 
         />
     <passive id="6" name="Heart to Heart"     
         description="Empathy hurts"               
-        gfx="item_clydepills.png"        
+        gfx="item_hearttoheart.png"        
         quality="3" 
         />
     <passive id="7" name="Forgotten Friend"   
         description="Bones for the bone god"      
-        gfx="item_clydepills.png"        
+        gfx="item_forgottenfriend.png"        
         quality="3" 
         />
     <passive id="8" name="Big Gulp"           
         description="Free refills"                
-        gfx="item_clydepills.png"        
+        gfx="item_forgottenfriend.png"        
         quality="3" 
         />
     <active  id="9" name="Coin Collection"    
         description="A penny for your thoughts"   
-        gfx="item_clydepills.png"        
+        gfx="item_coincollection.png"        
         quality="3" 
         chargetype="normal" 
         maxcharges="4" 
         />
     <active  id="10" name="Worm Bucket"    
         description="Gone fishing"   
-        gfx="item_clydepills.png"        
+        gfx="item_wormbucket.png"        
         quality="3" 
         chargetype="normal" 
         maxcharges="4" 
         />
     <active  id="11" name="Artifical Bloom"    
         description="Induced metamorphosis"   
-        gfx="item_clydepills.png"        
+        gfx="item_artificalbloom.png"        
         quality="4" 
         chargetype="normal" 
         maxcharges="6" 
         />
     <active  id="12" name="Room Hack"    
         description="commence hack"   
-        gfx="item_clydepills.png"        
+        gfx="item_forgottenfriend.png"        
         quality="2" 
         chargetype="normal" 
         maxcharges="2" 
         />
     <trinket  id="1" name="Orbit Worm"    
         description="Wibble Wobble"   
-        gfx="trinket_orbit_worm.png"
+        gfx="trinket_orbitworm.png"
         />
     <trinket  id="2" name="Trail Worm"    
         description="Ssslither"
-        gfx="trinket_orbit_worm.png"
+        gfx="trinket_trailworm.png"
         />
     <!-- murphy 835577836059361350 -->
     <passive id="13" name="Unstable Singularity"
         description="Prone to explosion"
-        gfx="item_clydepills.png"
+        gfx="item_unstablesingularity.png"
         quality="3" 
         />
     <passive id="14" name="Jester's Deck"
         description="Chaos, Chaos!"
-        gfx="item_clydepills.png"
+        gfx="item_jestersdeck.png"
         quality="2" 
         />
     <!-- magargo 1114358518884073544 -->
@@ -94,9 +94,22 @@
         chargetype="normal" 
         maxcharges="0" 
         />
+    <active id="16" name="Haggled Dice"
+        description="Can't you go lower?"
+        gfx="item_clydepills.png"
+        quality="2" 
+        chargetype="normal" 
+        maxcharges="2" 
+        />
     <!-- foiled again 700138214106726470 -->
     <trinket  id="3" name="Clumped Penny"
         description="Wealth of Illness"
         gfx="trinket_orbit_worm.png"
+        />
+    <!-- green steve 1114358518884073544 -->
+    <trinket  id="4" name="Participation Trophy"
+        description="You tried"
+        gfx="trinket_orbit_worm.png"
+        cache="firedelay"
         />
 </items>

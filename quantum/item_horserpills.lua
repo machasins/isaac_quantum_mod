@@ -175,15 +175,14 @@ end
 
 Quantum:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, HP.OnPlayerUpdate)
 
----Runs whenever a pill is used
+---Handle randomizing pill effects when a pill is used
 ---@param pillEffect PillEffect The effect that happened
 ---@param player EntityPlayer The player that used the pill
 function HP:OnPillUse(pillEffect, player, flags)
-    -- Handle randomizing pill effects when a pill is used
+    -- The save data for the mod
+    local save = Quantum.save.GetRunSave()
     -- Check if the player has the item
-    if player:HasCollectible(HP.ID) then
-        -- The save data for the mod
-        local save = Quantum.save.GetRunSave()
+    if save and player:HasCollectible(HP.ID) then
         -- Initialize the saved pill effects
         save.pillEffects = save.pillEffects or {}
         -- Loop through every saved pill effect
@@ -211,10 +210,10 @@ Quantum:AddCallback(ModCallbacks.MC_USE_PILL, HP.OnPillUse)
 ---@param pillColor PillColor The color the pill is
 ---@return PillEffect? newEffect The effect the pill is changed to
 function HP:GetPillEffect(pillEffect, pillColor)
+    -- Get the mod's save data
+    local save = Quantum.save.GetRunSave()
     -- Check if any player has the item
-    if UTILS.AnyPlayerHasCollectible(HP.ID) then
-        -- Get the mod's save data
-        local save = Quantum.save.GetRunSave()
+    if save and UTILS.AnyPlayerHasCollectible(HP.ID) then
         -- Initialize the saved pill effects
         local pillEffects = save.pillEffects or {}
         -- If the current pill effect is not saved, save it

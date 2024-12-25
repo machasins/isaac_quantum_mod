@@ -60,7 +60,8 @@ function Queue:UpdateQueue(frameCount, type)
             -- Check if it is time for the queue item to start
             if frameCount >= q.t_start then
                 -- Run the queue item's function, with how much time has passed as input
-                q.t_func(frameCount - q.t_start)
+                local s, error = pcall(q.t_func, frameCount - q.t_start)
+                if not s then print(error) end
                 -- Check if it is time for the queue item to end
                 if frameCount >= q.t_end then
                     -- Delete the item from the queue
@@ -72,12 +73,18 @@ function Queue:UpdateQueue(frameCount, type)
 
     -- Loop through all items in the callback queue
     for i, q in pairs(Queue.callback_queue) do
+        -- Run the check function
+        local stat, check = q.c_check(frameCount - q.c_start)
+        -- Call resulted in an error, print the error and move on through the queue
+        if not stat then
+            print(check)
         -- Check if the queue item exists
         -- AND that it is time to start the check
         -- AND that the check succeeds
-        if q ~= nil and q.u_type == type and frameCount >= q.c_start and q.c_check(frameCount - q.c_start) then
+        elseif q ~= nil and q.u_type == type and frameCount >= q.c_start and check then
             -- Call the callback
-            q.c_func(frameCount - q.c_start)
+            local s, error = pcall(q.c_func, frameCount - q.c_start)
+            if not s then print(error) end
             -- Delete the item from the queue
             Queue.callback_queue[i] = nil
         end

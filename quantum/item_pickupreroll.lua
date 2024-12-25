@@ -42,16 +42,19 @@ Quantum:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, PR.OnPickupInteract)
 function PR:RerollRoom()
     -- Loop through all collectibles
     for _, e in ipairs(Isaac.FindByType(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE)) do
-        -- The itempool for the run
-        local pool = game:GetItemPool()
-        -- The current room's itempool
-        local roomPool = pool:GetPoolForRoom(game:GetRoom():GetType(), RNG():GetSeed())
-        -- The item ID the item should reroll into
-        local rerolledItemID = pool:GetCollectible(roomPool, true)
-        -- Morph the item into the rerolled item
-        e:ToPickup():Morph(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, rerolledItemID, true)
-        -- Spawn a poof effect to signify reroll
-        Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF01, 0, e.Position, Vector.Zero, nil)
+        -- Make sure it's not an empty pedestal
+        if e.SubType ~= 0 then
+            -- The itempool for the run
+            local pool = game:GetItemPool()
+            -- The current room's itempool
+            local roomPool = pool:GetPoolForRoom(game:GetRoom():GetType(), RNG():GetSeed())
+            -- The item ID the item should reroll into
+            local rerolledItemID = pool:GetCollectible(roomPool, true)
+            -- Morph the item into the rerolled item
+            e:ToPickup():Morph(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, rerolledItemID, true)
+            -- Spawn a poof effect to signify reroll
+            Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF01, 0, e.Position, Vector.Zero, nil)
+        end
     end
 end
 
@@ -86,8 +89,8 @@ function PR:PickupUpdate()
             if player:HasCollectible(PR.ID) and player.QueuedItem.Item ~= nil and player.QueuedItem.Item:IsCollectible() then
                 -- If the player has not held up an item in the previous frame
                 if not save.playerHasItem[i] then
-                    -- Queue the reroll to happen in five frames (prevents empty item pedestals from generating new items)
-                    QUEUE:AddItem(5, 0, PR.RerollRoom, QUEUE.UpdateType.Update)
+                    -- REROLL!
+                    PR:RerollRoom()
                     -- Mark that the player has picked up an item
                     save.playerHasItem[i] = true
                 end
