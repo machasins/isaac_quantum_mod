@@ -15,6 +15,7 @@ DM.ID = Isaac.GetItemIdByName("Diced Meat")
 function DM:OnUseItem(id, RNG, player, Flags, Slot, CustomVarData)
     local save = Quantum.save.GetFloorSave(player)
     if save and player:GetDamageCooldown() <= 0 then
+        local changedItem = false
         -- Loop through all collectibles
         for _, e in ipairs(Isaac.FindByType(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE)) do
             -- The itempool for the run
@@ -27,6 +28,17 @@ function DM:OnUseItem(id, RNG, player, Flags, Slot, CustomVarData)
             e:ToPickup():Morph(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, rerolledItemID, true)
             -- Spawn a poof effect to signify reroll
             Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF01, 0, e.Position, Vector.Zero, nil)
+            -- Track that an item has changed
+            changedItem = true
+        end
+
+        -- Do not damage the player if no items were rerolled
+        if changedItem == false then
+            return  {
+                Discharge = false,
+                Remove = false,
+                ShowAnim = false,
+            }
         end
 
         -- Apply damage to the player

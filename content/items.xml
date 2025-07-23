@@ -23,6 +23,7 @@
         description="Glory to the crying king"    
         gfx="item_cultfollowing.png"        
         quality="4" 
+        devilprice="2" 
         />
     <passive id="6" name="Heart to Heart"     
         description="Empathy hurts"               
@@ -35,23 +36,25 @@
         quality="3" 
         />
     <passive id="8" name="Big Gulp"           
-        description="Free refills"                
+        description="Free refills [NOT FINISHED]"                
         gfx="item_forgottenfriend.png"        
         quality="3" 
         />
     <active  id="9" name="Coin Collection"    
         description="A penny for your thoughts"   
         gfx="item_coincollection.png"        
-        quality="3" 
+        quality="1" 
         chargetype="normal" 
         maxcharges="4" 
+        shopprice="10"
         />
     <active  id="10" name="Worm Bucket"    
         description="Gone fishing"   
         gfx="item_wormbucket.png"        
-        quality="3" 
+        quality="1" 
         chargetype="normal" 
         maxcharges="4" 
+        shopprice="10"
         />
     <active  id="11" name="Artifical Bloom"    
         description="Induced metamorphosis"   
@@ -61,7 +64,7 @@
         maxcharges="6" 
         />
     <active  id="12" name="Room Hack"    
-        description="commence hack"   
+        description="commence hack [NOT FINISHED]"   
         gfx="item_forgottenfriend.png"        
         quality="2" 
         chargetype="normal" 
@@ -89,10 +92,11 @@
     <!-- magargo 1114358518884073544 -->
     <active id="15" name="Diced Meat"
         description="Spicy!"
-        gfx="item_clydepills.png"
+        gfx="item_dicedmeat.png"
         quality="4" 
         chargetype="normal" 
         maxcharges="0" 
+        devilprice="2"
         />
     <active id="16" name="Haggled Dice"
         description="Can't you go lower?"
@@ -100,6 +104,7 @@
         quality="2" 
         chargetype="normal" 
         maxcharges="2" 
+        shopprice="30" 
         />
     <!-- foiled again 700138214106726470 -->
     <trinket  id="3" name="Clumped Penny"
